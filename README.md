@@ -9,11 +9,11 @@ This program was designed for the PID of CEPC AHCAL.  By reconstructing variable
 ## Usage
 First of all, you can run
 ```shell
-iRec -h
+iRec -h[elp]
 ```
 or
 ```shell
-iBDT -h
+iBDT -h[elp]
 ```
 to display help information.  For more detail, please refer to the following instructions. :p
 
