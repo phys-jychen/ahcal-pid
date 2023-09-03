@@ -1,7 +1,7 @@
 # AHCAL-PID, a Simple Tool for PID
 
 ## Author
-Ji-Yuan CHEN (SJTU; email: <jy_chen@sjtu.edu.cn>)
+Ji-Yuan CHEN (SJTU; <jy_chen@sjtu.edu.cn>)
 
 ## Description
 This program was designed for the PID of CEPC AHCAL.  By reconstructing variables describing the topology of the hadronic and electromagnetic shower, we can perform PID with the help of BDT, using the TMVA (the **T**oolkit for **M**ulti-**V**ariate data **A**nalysis with ROOT) package.
@@ -15,7 +15,7 @@ iRec -f [file] -t [tree]
 The name of the output file is given a prefix "pid", and the original branches are kept.  If you need to add some new variables, you can modify the file `src/Variables.cxx`.
 
 ### Performing BDT
-First, make sure that the variables as well as the ROOT files listed in `src/xxx` are all present (you can also modify `src/xxx` to meet your own needs).  Then, execute:
+First, make sure that the variables as well as the ROOT files listed in `bdt.cxx` are all present (you can also modify this file to meet your own needs).  Then, execute:
 ```shell
 iBDT -t [tree] -train
 ```
@@ -25,7 +25,7 @@ Possibly you need to know the performance on the validation dataset.  In this ca
 ```shell
 iBDT -v -f [file] -t [tree]
 ```
-Then the BDT response is stored in the output ROOT file, whose name has prefix "bdt".
+Then the BDT response is stored in the output ROOT file, whose name has prefix "bdt".  Possibly it is necessary to modify `src/BDT.cxx`.  Anyway, make sure that the input variables are exactly the same as those in `bdt.cxx`!
 
 ## Environment Set-up
 This project requires CMake version >= 3.17.  If you are working on the cluster of INPAC, IHEP, etc., the environment could be easily set up by simply executing
@@ -51,4 +51,4 @@ source setup.sh
 By now, the compilation have been finished.  Prepare your datasets, and have fun!
 
 ## Acknowledgement & Reference
-I would like to thank Mr Zhen WANG (TDLI/SJTU), for kindly providing me with his project [cepc\_hbuana](https://github.com/wangz1996/cepc_hbuana) in order to help me go through the whole process of BDT.  In this project (CEPC-PID), the framework of adding variables and BDT are adopted from cepc\_hbuana.
+I would like to thank Mr Zhen WANG (TDLI/SJTU), for kindly providing me with his project [cepc\_hbuana](https://github.com/wangz1996/cepc_hbuana) in order to help me go through the whole process of BDT.  In this project (AHCAL-PID), the framework of adding variables and BDT are adopted from cepc\_hbuana.
