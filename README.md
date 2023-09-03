@@ -7,6 +7,16 @@ Ji-Yuan CHEN (SJTU; <jy_chen@sjtu.edu.cn>)
 This program was designed for the PID of CEPC AHCAL.  By reconstructing variables describing the topology of the hadronic and electromagnetic shower, we can perform PID with the help of BDT, using the TMVA (the **T**oolkit for **M**ulti-**V**ariate data **A**nalysis with ROOT) package.
 
 ## Usage
+First of all, you can run
+```shell
+iRec -h
+```
+or
+```shell
+iBDT -h
+```
+to display help information.  For more detail, please refer to the following instructions. :p
+
 ### Adding Reconstructed Variables
 In the directory of the ROOT file to be analyses, execute:
 ```shell
@@ -40,7 +50,7 @@ Then, the environment with CMake 3.20.0 and ROOT 6.26/04 are configured.  As lon
 Having set up the environment, this project can be cloned from GitHub and compiled in a normal way:
 ```shell
 git clone
-cd cepc-pid
+cd ahcal-pid
 mkdir build
 cd build
 cmake ..
@@ -51,4 +61,4 @@ source setup.sh
 By now, the compilation have been finished.  Prepare your datasets, and have fun!
 
 ## Acknowledgement & Reference
-I would like to thank Mr Zhen WANG (TDLI/SJTU), for kindly providing me with his project [cepc\_hbuana](https://github.com/wangz1996/cepc_hbuana) in order to help me go through the whole process of BDT.  In this project (AHCAL-PID), the framework of adding variables and BDT are adopted from cepc\_hbuana.
+The author would like to thank Mr Zhen WANG (TDLI/SJTU), for kindly providing me with his project [cepc\_hbuana](https://github.com/wangz1996/cepc_hbuana) in order to help me go through the whole process of BDT.  In this project (AHCAL-PID), the framework of adding variables and BDT are adopted from cepc\_hbuana.
