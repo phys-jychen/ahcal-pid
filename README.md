@@ -22,16 +22,16 @@ In the directory of the ROOT file to be analyses, execute:
 ```shell
 iRec -f [file] -t [tree]
 ```
-The name of the output file is given a prefix "pid", and the original branches are kept.  If you need to add some new variables, you can modify the file `src/Variables.cxx`.
+The name of the output file is given a prefix "pid", and the original branches are kept.  If you need to add some new variables or modify the definitions of some of them, please go to the file `src/Variables.cxx`.
 
 ### Performing BDT
-First, make sure that the variables as well as the ROOT files listed in `bdt.cxx` are all present (you can also modify this file to meet your own needs).  Then, execute:
+Before you begin, make sure that the variables as well as the ROOT files listed in `bdt.cxx` are all present (you can also modify this file to meet your own needs).  Then, execute:
 ```shell
-iBDT -t [tree] -train
+iBDT -r -t [tree]
 ```
-Eventually you can see the output files, one containing the data obtained during training and test, and the other containing the output information shown on the screen.
+Eventually you can see the output file containing the data obtained during training and test (`TMVAMulticlass.root`).
 
-Possibly you need to know the performance on the validation dataset.  In this case, execute:
+Possibly you need to know the performance of BDT on the validation dataset.  In this case, execute:
 ```shell
 iBDT -v -f [file] -t [tree]
 ```
@@ -42,7 +42,7 @@ This project requires CMake version >= 3.17.  If you are working on the cluster 
 ```shell
 source /cvmfs/sft.cern.ch/lcg/views/LCG_102/x86_64-centos7-gcc11-opt/setup.sh
 ```
-(This has been included in setup.sh.)
+(This command has been included in `setup.sh`.)
 
 Then, the environment with CMake 3.20.0 and ROOT 6.26/04 are configured.  As long as no compilation errors are raised and the CMake version requirement is met, other versions on the LCG are also acceptable. :p
 
@@ -61,4 +61,4 @@ source setup.sh
 By now, the compilation have been finished.  Prepare your datasets, and have fun!
 
 ## Acknowledgement & Reference
-The author would like to thank Mr Zhen WANG (TDLI/SJTU), for kindly providing me with his project [cepc\_hbuana](https://github.com/wangz1996/cepc_hbuana) in order to help me go through the whole process of BDT.  In this project (AHCAL-PID), the framework of adding variables and BDT are adopted from cepc\_hbuana.
+The author would like to thank Mr Zhen WANG (TDLI/SJTU), for kindly offering his project [cepc\_hbuana](https://github.com/wangz1996/cepc_hbuana) for the convenience of going through the whole process of BDT.  In this project (AHCAL-PID), the framework of reconstructing variables and BDT are adopted from cepc\_hbuana.
