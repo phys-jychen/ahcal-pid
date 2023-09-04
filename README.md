@@ -9,20 +9,27 @@ This program was designed for the PID of CEPC AHCAL.  By reconstructing variable
 ## Usage
 First of all, you can run
 ```shell
+iSel -h[elp]
+# or
 iRec -h[elp]
-```
-or
-```shell
+# or
 iBDT -h[elp]
 ```
 to display help information.  For more detail, please refer to the following instructions. :p
+
+### Selecting Hits
+In MC samples or even real data, a large number of hits do not deposit energy in the scintillator.  These hits are not useful in our analysis and should be discarded.  To achieve this, run
+```shell
+iSel -f [file] -t [tree]
+```
+After the program finishes, an output file whose name has a prefix "sel" is created. The original branches have already been deleted.
 
 ### Adding Reconstructed Variables
 In the directory of the ROOT file to be analyses, execute:
 ```shell
 iRec -f [file] -t [tree]
 ```
-The name of the output file is given a prefix "pid", and the original branches are kept.  If you need to add some new variables or modify the definitions of some of them, please go to the file `src/Variables.cxx`.
+The name of the output file is given a prefix "pid", and the original branches are not kept.  If you need to add some new variables or modify the definitions of some of them, please go to the file `src/Variables.cxx`.
 
 ### Performing BDT
 Before you begin, make sure that the variables as well as the ROOT files listed in `bdt.cxx` are all present (you can also modify this file to meet your own needs).  Then, execute:
