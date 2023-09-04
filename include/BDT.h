@@ -50,28 +50,6 @@ public:
         test_bkg.insert(pair<TString, TString>(TString(file), TString(tree)));
     }
 
-    /*
-    void AddTrainSig(const string& file, const string& tree, const string& particle_name)
-    {
-        train_sig.insert(pair<pair<TString, TString>, TString>(pair<TString, TString>(TString(file), TString(tree)), TString(particle_name)));
-    }
-
-    void AddTrainBkg(const string& file, const string& tree, const string& particle_name)
-    {
-        train_bkg.insert(pair<pair<TString, TString>, TString>(pair<TString, TString>(TString(file), TString(tree)), TString(particle_name)));
-    }
-
-    void AddTestSig(const string& file, const string& tree, const string& particle_name)
-    {
-        test_sig.insert(pair<pair<TString, TString>, TString>(pair<TString, TString>(TString(file), TString(tree)), TString(particle_name)));
-    }
-
-    void AddTestBkg(const string& file, const string& tree, const string& particle_name)
-    {
-        test_bkg.insert(pair<pair<TString, TString>, TString>(pair<TString, TString>(TString(file), TString(tree)), TString(particle_name)));
-    }
-    */
-
     void AddVar(const string& v, const Char_t& type)
     {
         var.insert(pair<TString, Char_t>(TString(v), type));
@@ -96,12 +74,6 @@ private:
     map<TString, TString> train_bkg;
     map<TString, TString> test_sig;
     map<TString, TString> test_bkg;
-    /*
-    map<pair<TString, TString>, TString> train_sig;
-    map<pair<TString, TString>, TString> train_bkg;
-    map<pair<TString, TString>, TString> test_sig;
-    map<pair<TString, TString>, TString> test_bkg;
-    */
 };
 
 #endif

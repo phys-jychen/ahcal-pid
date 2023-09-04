@@ -50,7 +50,7 @@ private:
 		Double_t e = 0.0;
 	}hcl;
 
-	TH2D *hht;
+	TH2D* hht;
 
 	unordered_map<Int_t,vector<hit*>> layer_hits;
 	vector<hcl*> Hough_Cluster;

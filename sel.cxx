@@ -1,4 +1,4 @@
-#include "Variables.h"
+#include "Select.h"
 using namespace std;
 
 Int_t main(Int_t argc, char* argv[])
@@ -27,23 +27,23 @@ Int_t main(Int_t argc, char* argv[])
             tree = string(argv[i + 1]);
     }
 
-    Variables* v = new Variables();
+    Select* s = new Select();
 
     if (file != "" && tree != "")
     {
-        cout << "Reconstructing variables..." << endl;
+        cout << "Discarding empty hits..." << endl;
         cout << "File: " << file << endl;
         cout << "Tree: " << tree << endl << endl;
 
-        v->GenNtuple(file, tree);
+        s->ValidHits(file, tree);
     }
 
     else if (help == 0)
     {
         cout << "Invalid input." << endl;
-        cout << "Run \"iRec -h\" to display help information." << endl << endl;
+        cout << "Run \"iSel -h\" to display help information." << endl << endl;
     }
 
-    delete v;
+    delete s;
     return 0;
 }

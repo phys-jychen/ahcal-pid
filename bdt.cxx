@@ -13,9 +13,10 @@ Int_t main(Int_t argc, char* argv[])
             help = 1;
             cout << endl;
             cout << "Help information" << endl << endl;
-            cout << "Reconstruct variables: iRec -f [file] -t [tree]" << endl;
-            cout << "PID with BDT:          iBDT -r -t [tree]" << endl;
-            cout << "Classification:        iBDT -v -f [file] -t [tree]" << endl << endl;
+            cout << "Discard hits with E = 0: iSel -f [file] -t [tree]" << endl;
+            cout << "Reconstruct variables:   iRec -f [file] -t [tree]" << endl;
+            cout << "PID with BDT:            iBDT -r -t [tree]" << endl;
+            cout << "Classification:          iBDT -v -f [file] -t [tree]" << endl << endl;
             break;
         }
 
@@ -47,8 +48,10 @@ Int_t main(Int_t argc, char* argv[])
 //        b->AddVar("E9E49",              'D');
         b->AddVar("Edep",               'D');
         b->AddVar("Emean",              'D');
-//        b->AddVar("FD_2D",              'D');
-//        b->AddVar("FD_3D",              'D');
+        b->AddVar("FD_2D_mean",         'D');
+        b->AddVar("FD_3D_mean",         'D');
+        b->AddVar("FD_2D_rms",          'D');
+        b->AddVar("FD_3D_rms",          'D');
         b->AddVar("hit_layer",          'D');
 //        b->AddVar("hit_time_mean",      'D');
 //        b->AddVar("hit_time_rms",       'D');

@@ -111,6 +111,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     Use["BDTG"] = 1;
     cout << "==> Start TMVAMulticlassApplication" << endl;
     TMVA::Reader* reader = new TMVA::Reader( "!Color:!Silent" );
+
     Float_t  bdt_COG_X_overall;
     Float_t  bdt_COG_Y_overall;
     Float_t  bdt_COG_Z_overall;
@@ -119,8 +120,10 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
 //    Float_t  bdt_E9E49;
     Float_t  bdt_Edep;
     Float_t  bdt_Emean;
-//    Float_t  bdt_FD_2D;
-//    Float_t  bdt_FD_3D;
+    Float_t  bdt_FD_2D_mean;
+    Float_t  bdt_FD_3D_mean;
+    Float_t  bdt_FD_2D_rms;
+    Float_t  bdt_FD_3D_rms;
     Float_t  bdt_hit_layer;
 //    Float_t  bdt_hit_time_mean;
 //    Float_t  bdt_hit_time_rms;
@@ -147,8 +150,10 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
 //    reader->AddVariable("E9E49",              &bdt_E9E49);
     reader->AddVariable("Edep",               &bdt_Edep);
     reader->AddVariable("Emean",              &bdt_Emean);
-//    reader->AddVariable("FD_2D",              &bdt_FD_2D);
-//    reader->AddVariable("FD_3D",              &bdt_FD_3D);
+    reader->AddVariable("FD_2D_mean",         &bdt_FD_2D_mean);
+    reader->AddVariable("FD_3D_mean",         &bdt_FD_3D_mean);
+    reader->AddVariable("FD_2D_rms",          &bdt_FD_2D_rms);
+    reader->AddVariable("FD_3D_rms",          &bdt_FD_3D_rms);
     reader->AddVariable("hit_layer",          &bdt_hit_layer);
 //    reader->AddVariable("hit_time_mean",      &bdt_hit_time_mean);
 //    reader->AddVariable("hit_time_rms",       &bdt_hit_time_rms);
@@ -179,8 +184,10 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
 //    rdf_input.emplace_back("E9E49");
     rdf_input.emplace_back("Edep");
     rdf_input.emplace_back("Emean");
-//    rdf_input.emplace_back("FD_2D");
-//    rdf_input.emplace_back("FD_3D");
+    rdf_input.emplace_back("FD_2D_mean");
+    rdf_input.emplace_back("FD_3D_mean");
+    rdf_input.emplace_back("FD_2D_rms");
+    rdf_input.emplace_back("FD_3D_rms");
     rdf_input.emplace_back("hit_layer");
 //    rdf_input.emplace_back("hit_time_mean");
 //    rdf_input.emplace_back("hit_time_rms");
@@ -210,8 +217,10 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
 //         Double_t E9E49,
          Double_t Edep,
          Double_t Emean,
-//         Double_t FD_2D,
-//         Double_t FD_3D,
+         Double_t FD_2D_mean,
+         Double_t FD_3D_mean,
+         Double_t FD_2D_rms,
+         Double_t FD_3D_rms,
          Double_t hit_layer,
 //         Double_t hit_time_mean,
 //         Double_t hit_time_rms,
@@ -238,8 +247,10 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
 //        bdt_E9E49              = E9E49;
         bdt_Edep               = Edep;
         bdt_Emean              = Emean;
-//        bdt_FD_2D              = FD_2D;
-//        bdt_FD_3D              = FD_3D;
+        bdt_FD_2D_mean         = FD_2D_mean;
+        bdt_FD_3D_mean         = FD_3D_mean;
+        bdt_FD_2D_rms          = FD_2D_rms;
+        bdt_FD_3D_rms          = FD_3D_rms;
         bdt_hit_layer          = hit_layer;
 //        bdt_hit_time_mean      = hit_time_mean;
 //        bdt_hit_time_rms       = hit_time_rms;

@@ -1,5 +1,5 @@
-#ifndef VARIABLES_HH
-#define VARIABLES_HH
+#ifndef SELECT_HH
+#define SELECT_HH
 #include <vector>
 #include <fstream>
 #include <string>
@@ -30,13 +30,13 @@ using namespace std;
 using namespace ROOT;
 using namespace TMath;
 
-class Variables
+class Select
 {
 public:
-    Variables();
-    ~Variables();
+    Select();
+    ~Select();
 
-    Int_t GenNtuple(const string& file, const string& tree);
+    Int_t ValidHits(const string& file, const string& tree);
 };
 
 #endif
