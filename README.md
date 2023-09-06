@@ -45,24 +45,29 @@ iBDT -v -f [file] -t [tree]
 Then the BDT response is stored in the output ROOT file, whose name has prefix "bdt".  Possibly it is necessary to modify `src/BDT.cxx`.  Anyway, make sure that the input variables are exactly the same as those in `bdt.cxx`!
 
 ## Environment Set-up
-This project requires CMake version >= 3.17.  If you are working on the cluster of INPAC, IHEP, etc., the environment could be easily set up by simply executing
+This project requires CMake version >= 3.17.  If you are working on the cluster of INPAC, IHEP, etc., the environment can be easily set up by simply executing
 ```shell
 source /cvmfs/sft.cern.ch/lcg/views/LCG_102/x86_64-centos7-gcc11-opt/setup.sh
 ```
 (This command has been included in `setup.sh`.)
 
-Then, the environment with CMake 3.20.0 and ROOT 6.26/04 are configured.  As long as no compilation errors are raised and the CMake version requirement is met, other versions on the LCG are also acceptable. :p
+Then, the environment with CMake 3.20.0 and ROOT 6.26/04 is configured.  As long as no compilation errors are raised and the CMake version requirement is met, other versions on the LCG are also acceptable. :p
 
 ## Installation & Compilation
 Having set up the environment, this project can be cloned from GitHub and compiled in a normal way:
 ```shell
-git clone
+git clone git@github.com:phys-jychen/ahcal-pid.git
 cd ahcal-pid
 mkdir build
 cd build
 cmake ..
 make -j100    # Just do it!
 source setup.sh
+```
+
+Every time you log in to the cluster, before the first time of running this program, remember to execute
+```shell
+source [build]/setup.sh
 ```
 
 By now, the compilation have been finished.  Prepare your datasets, and have fun!
