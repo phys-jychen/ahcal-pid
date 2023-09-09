@@ -31,17 +31,19 @@ Int_t main(Int_t argc, char* argv[])
 
     if (file != "" && tree != "")
     {
-        cout << "Reconstructing variables..." << endl;
-        cout << "File: " << file << endl;
-        cout << "Tree: " << tree << endl << endl;
+        cout << "-----> Reconstructing variables..." << endl;
+        cout << "-----> File: " << file << endl;
+        cout << "-----> Tree: " << tree << endl << endl;
 
         v->GenNtuple(file, tree);
+
+        cout << "-----> Variable reconstruction finished!" << endl;
     }
 
     else if (help == 0)
     {
         cout << "Invalid input." << endl;
-        cout << "Run \"iRec -h\" to display help information." << endl << endl;
+        cout << "Run \"iRec -h[elp]\" to display help information." << endl << endl;
     }
 
     delete v;

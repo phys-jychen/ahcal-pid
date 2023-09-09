@@ -37,8 +37,8 @@ Int_t main(Int_t argc, char* argv[])
 
     if (train == 1 && tree != "")
     {
-        cout << "Training and testing..." << endl;
-        cout << "Tree: " << tree << endl;
+        cout << "-----> Training and testing..." << endl;
+        cout << "-----> Tree: " << tree << endl;
 
         b->AddVar("COG_X_overall",      'D');
         b->AddVar("COG_Y_overall",      'D');
@@ -81,21 +81,25 @@ Int_t main(Int_t argc, char* argv[])
         b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/build/test/pid_test_e.root",     tree);
 
         b->TrainBDT();
+
+        cout << "-----> Training and testing finished!" << endl;
 	}
 
     else if (bdt == 1 && file != "" && tree != "")
     {
-        cout << "Classifying..." << endl;
-        cout << "File: " << file << endl;
-        cout << "Tree: " << tree << endl << endl;
+        cout << "-----> Classifying..." << endl;
+        cout << "-----> File: " << file << endl;
+        cout << "-----> Tree: " << tree << endl << endl;
 
         b->BDTNtuple(file, tree);
+
+        cout << "-----> Classification finished!" << endl;
     }
 
     else if (help == 0)
     {
         cout << "Invalid input." << endl;
-        cout << "Run \"iBDT -h\" to display help information." << endl;
+        cout << "Run \"iBDT -h[elp]\" to display help information." << endl;
     }
 
     delete b;

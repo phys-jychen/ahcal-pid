@@ -31,17 +31,19 @@ Int_t main(Int_t argc, char* argv[])
 
     if (file != "" && tree != "")
     {
-        cout << "Discarding empty hits..." << endl;
-        cout << "File: " << file << endl;
-        cout << "Tree: " << tree << endl << endl;
+        cout << "-----> Discarding empty hits..." << endl;
+        cout << "-----> File: " << file << endl;
+        cout << "-----> Tree: " << tree << endl << endl;
 
         s->ValidHits(file, tree);
+
+        cout << "-----> Selection finished!" << endl;
     }
 
     else if (help == 0)
     {
         cout << "Invalid input." << endl;
-        cout << "Run \"iSel -h\" to display help information." << endl << endl;
+        cout << "Run \"iSel -h[elp]\" to display help information." << endl << endl;
     }
 
     delete s;
