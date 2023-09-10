@@ -53,17 +53,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     outname = outname.substr(outname.find_last_of('/') + 1);
     outname = "pid_" + outname;
     auto fout = dm->Define("nhits", "(Int_t) Hit_X_nonzero.size()")
-    /*
-    // The number of hits with non-zero energy deposition
-    .Define("nhits_nonzero", [] (Int_t nhits, vector<Double_t> Hit_Energy_nonzero)
-    {
-        Int_t nhits_nonzero = 0;
-        for (Int_t i = 0; i < nhits; i++)
-            if (Hit_Energy.at(i) > 0)
-                nhits_nonzero++;
-        return nhits_nonzero;
-    }, {"nhits", "Hit_Energy"})
-    */
     // Theta of the hits [spherical co-ordinate, origin = (0, 0, 0)]
     .Define("Hit_Theta", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, Int_t nhits)
     {
@@ -169,7 +158,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     }, {"Hit_Energy_nonzero"})
     // Average energy deposition of the hits
     .Define("Emean", "Edep / nhits")
-    //
+    // RMS value of the positions of all the hits on a layer
     .Define("layer_rms", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)->vector<Double_t>
     {
         vector<Double_t> layer_rms(nlayer);
@@ -285,7 +274,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
                 shower_layer++;
         return shower_layer;
     }, {"layer_xwidth", "layer_ywidth"})
-    // 
+    // Number of layers with at least one hit
     .Define("hit_layer", [] (vector<Int_t> layer)
     {
         Double_t hit_layer = 0;
@@ -297,7 +286,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
                 hit_layer++;
         return hit_layer;
     }, {"layer"})
-    // 
+    // The proportion of layers with xwidth, ywidth >= 60 mm within the layers with at least one hit
     .Define("shower_layer_ratio", "shower_layer / hit_layer")
     // Average number of hits in the 3*3 cells around a given one
     .Define("shower_density", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
@@ -473,7 +462,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         E9E49 /= nhits;
         return E9E49;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
-    // 
+    // The distance between the layer with largest RMS value of position and the beginning layer
     .Define("shower_length", [] (vector<Double_t> layer_rms, Int_t shower_start)
     {
         Double_t shower_length = 0.0;
