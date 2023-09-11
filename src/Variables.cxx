@@ -1,5 +1,24 @@
 #include "Variables.h"
 
+// Cell width =  40 mm: Bias = 342.55 mm, Period =  40.3 mm
+// Cell width =  80 mm: Bias = 321.2  mm, Period =  80.3 mm
+// Cell width = 120 mm: Bias = 300.75 mm, Period = 120.3 mm
+
+const Double_t CellWidthX = 40;
+const Double_t CellWidthY = 40;
+const Double_t gapX = 0.3;
+const Double_t gapY = 0.3;
+const Double_t PeriodX = CellWidthX + gapX;
+const Double_t PeriodY = CellWidthY + gapY;
+const Double_t Thick = 30;
+
+const Double_t nCellX = 18;
+const Double_t nCellY = 18;
+const Double_t nLayer = 40;
+
+const Double_t BiasX = 0.5 * (nCellX - 1) * PeriodX;
+const Double_t BiasY = 0.5 * (nCellY - 1) * PeriodY;
+
 Int_t NHScaleV2(RVec<Double_t> const& pos_x, RVec<Double_t> const& pos_y, RVec<Double_t> const& pos_z, Int_t const& RatioX, Int_t const& RatioY, Int_t const& RatioZ)
 {
     Int_t ReScaledNH = 0;
@@ -8,15 +27,9 @@ Int_t NHScaleV2(RVec<Double_t> const& pos_x, RVec<Double_t> const& pos_y, RVec<D
     Int_t tmpK = 0;
     Double_t tmpEn = 0;
     Int_t NewCellID0 = 0;
-    // Cell width =  40 mm: Bias = 342.55 mm, Width =  40.3 mm
-    // Cell width =  80 mm: Bias = 321.2  mm, Width =  80.3 mm
-    // Cell width = 120 mm: Bias = 300.75 mm, Width = 120.3 mm
-    const Double_t Bias = 342.55;
-    const Double_t Width = 40.3;
-    const Double_t Thick = 30;
     const Int_t NumHit = pos_x.size();
 
-    std::map<Double_t, Double_t> testIDtoEnergy;
+    map<Double_t, Double_t> testIDtoEnergy;
 
     for (Int_t i = 0; i < NumHit; i++)
     {
@@ -24,8 +37,8 @@ Int_t NHScaleV2(RVec<Double_t> const& pos_x, RVec<Double_t> const& pos_y, RVec<D
         Double_t y = pos_y.at(i);
         Double_t z = pos_z.at(i);
 
-        tmpI = (Int_t ((x + Bias) / Width) + Int_t(Abs(x) / x)) / RatioX;
-        tmpJ = (Int_t ((y + Bias) / Width) + Int_t(Abs(y) / y)) / RatioY;
+        tmpI = (Int_t ((x + BiasX) / PeriodX) + Int_t(Abs(x) / x)) / RatioX;
+        tmpJ = (Int_t ((y + BiasY) / PeriodY) + Int_t(Abs(y) / y)) / RatioY;
         tmpK = (Int_t) (z / Thick) / RatioZ;
         tmpEn = 1;
 
@@ -47,13 +60,6 @@ Variables::~Variables() {}
 
 Int_t Variables::GenNtuple(const string& file, const string& tree)
 {
-    // Cell width =  40 mm: Bias = 342.55 mm, Width =  40.3 mm
-    // Cell width =  80 mm: Bias = 321.2  mm, Width =  80.3 mm
-    // Cell width = 120 mm: Bias = 300.75 mm, Width = 120.3 mm
-    const Double_t Bias = 342.55;
-    const Double_t Width = 40.3;
-    const Int_t nlayer = 40;
-    const Int_t thick = 30;
     //EnableImplicitMT();
     DisableImplicitMT();
     RDataFrame* dm = new RDataFrame(tree, file);
@@ -104,13 +110,13 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     {
         vector<Int_t> layer = {};
         for (Int_t i = 0; i < nhits; i++)
-            layer.emplace_back((Int_t) round(Hit_Z_nonzero.at(i) / thick));
+            layer.emplace_back((Int_t) round(Hit_Z_nonzero.at(i) / Thick));
         return layer;
     }, {"Hit_Z_nonzero", "nhits"})
     // Number of hits with non-zero energy deposition on each layer
     .Define("hits_on_layer", [] (vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
-        vector<Int_t> hits_on_layer(nlayer);
+        vector<Int_t> hits_on_layer(nLayer);
         for (Int_t i = 0; i < nhits; i++)
         {
             Int_t ilayer = layer.at(i);
@@ -121,7 +127,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // Energy deposition on each layer
     .Define("layer_energy", [] (vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
-        vector<Double_t> layer_energy(nlayer);
+        vector<Double_t> layer_energy(nLayer);
         for (Int_t i = 0; i < nhits; i++)
             layer_energy.at(layer.at(i)) += Hit_Energy_nonzero.at(i);
         return layer_energy;
@@ -169,9 +175,9 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // RMS value of the positions of all the hits on a layer
     .Define("layer_rms", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)->vector<Double_t>
     {
-        vector<Double_t> layer_rms(nlayer);
+        vector<Double_t> layer_rms(nLayer);
         vector<TH2D*> hvec;
-        for (Int_t i = 0; i < nlayer; i++)
+        for (Int_t i = 0; i < nLayer; i++)
             hvec.emplace_back(new TH2D("h" + TString(to_string(i)) + "_rms", "Layer RMS", 100, -400, 400, 100, -400, 400));
         for (Int_t i = 0; i < nhits; i++)
         {
@@ -192,8 +198,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // The layer where the shower begins; otherwise it is set to be 42
     .Define("shower_start", [] (vector<Int_t> hits_on_layer, vector<Double_t> layer_rms)
     {
-        Int_t shower_start = nlayer + 2;
-        for (Int_t i = 0; i < nlayer - 3; i++)
+        Int_t shower_start = nLayer + 2;
+        for (Int_t i = 0; i < nLayer - 3; i++)
             if (hits_on_layer.at(i) >= 4 && hits_on_layer.at(i + 1) >= 4 && hits_on_layer.at(i + 2) >= 4 && hits_on_layer.at(i + 3) >= 4)
             {
                 shower_start = i;
@@ -204,8 +210,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // The layer where the shower ends
     .Define("shower_end", [] (vector<Int_t> hits_on_layer, vector<Double_t> layer_rms, Int_t shower_start)
     {
-        Int_t shower_end = nlayer + 2;
-        if (shower_start == nlayer + 2)
+        Int_t shower_end = nLayer + 2;
+        if (shower_start == nLayer + 2)
             return shower_end;
         for (Int_t i = shower_start; i < hits_on_layer.size() - 3; i++)
             if (hits_on_layer.at(i) < 4 && hits_on_layer.at(i + 1) < 4)
@@ -213,8 +219,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
                 shower_end = i;
                 break;
             }
-        if (shower_end == nlayer + 2)
-            shower_end = nlayer;
+        if (shower_end == nLayer + 2)
+            shower_end = nLayer;
         return shower_end;
     }, {"hits_on_layer", "layer_rms", "shower_start"})
     // Shower radius of the shower (between beginning and ending layers)
@@ -236,9 +242,9 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // RMS value of the shower in x direction
     .Define("layer_xwidth", [] (vector<Double_t> Hit_X_nonzero, vector<Int_t> layer, Int_t nhits)
     {
-        vector<Double_t> layer_xwidth(nlayer);
+        vector<Double_t> layer_xwidth(nLayer);
         vector<TH1D*> h;
-        for (Int_t l = 0; l < nlayer; l++)
+        for (Int_t l = 0; l < nLayer; l++)
             h.emplace_back(new TH1D(TString("h") + TString(to_string(l)), "test", 100, -400, 400));
         for (Int_t i = 0; i < nhits; i++)
         {
@@ -256,9 +262,9 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // RMS value of the shower in y direction
     .Define("layer_ywidth", [] (vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, Int_t nhits)
     {
-        vector<Double_t> layer_ywidth(nlayer);
+        vector<Double_t> layer_ywidth(nLayer);
         vector<TH1D*> h;
-        for (Int_t l = 0; l < nlayer; l++)
+        for (Int_t l = 0; l < nLayer; l++)
             h.emplace_back(new TH1D(TString("h") + TString(to_string(l)), "test", 100, -400, 400));
         for (Int_t i = 0; i < nhits; i++)
         {
@@ -277,7 +283,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     .Define("shower_layer", [] (vector<Double_t> layer_xwidth, vector<Double_t> layer_ywidth)
     {
         Double_t shower_layer = 0;
-        for (Int_t i = 0; i < nlayer; i++)
+        for (Int_t i = 0; i < nLayer; i++)
             if (layer_xwidth.at(i) >= 60 && layer_ywidth.at(i) >= 60)
                 shower_layer++;
         return shower_layer;
@@ -289,7 +295,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         unordered_map<Int_t, Int_t> map_layer_hit;
         for (Double_t i : layer)
             map_layer_hit[i]++;
-        for (Int_t i = 0; i < nlayer; i++)
+        for (Int_t i = 0; i < nLayer; i++)
             if (map_layer_hit.count(i) > 0)
                 hit_layer++;
         return hit_layer;
@@ -297,14 +303,14 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // The proportion of layers with xwidth, ywidth >= 60 mm within the layers with at least one hit
     .Define("shower_layer_ratio", "shower_layer / hit_layer")
     // Average number of hits in the 3*3 cells around a given one
-    .Define("shower_density", [Bias, Width] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
+    .Define("shower_density", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
         Double_t shower_density = 0.0;
         unordered_map<Int_t, Int_t> map_CellID;
         for (Int_t j = 0; j < nhits; j++)
         {
-            Int_t x = round((Hit_X_nonzero.at(j) + Bias) / Width);
-            Int_t y = round((Hit_Y_nonzero.at(j) + Bias) / Width);
+            Int_t x = round((Hit_X_nonzero.at(j) + BiasX) / PeriodX);
+            Int_t y = round((Hit_Y_nonzero.at(j) + BiasY) / PeriodY);
             Int_t z = layer.at(j);
             Int_t index = z * 100000 + x * 100 + y;
             map_CellID[index] += 1;
@@ -313,8 +319,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         {
             if (Hit_Energy_nonzero.at(i) == 0.0)
                 continue;
-            Int_t x = round((Hit_X_nonzero.at(i) + Bias) / Width);
-            Int_t y = round((Hit_Y_nonzero.at(i) + Bias) / Width);
+            Int_t x = round((Hit_X_nonzero.at(i) + BiasX) / PeriodX);
+            Int_t y = round((Hit_Y_nonzero.at(i) + BiasY) / PeriodY);
             Int_t z = layer.at(i);
             for (Int_t ix = x - 1; ix <= x + 1; ix++)
             {
@@ -333,7 +339,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return shower_density;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
     // Energy deposition of the central cell divided by the total energy deposition in the 3*3 cells around it
-    .Define("E1E9", [Bias, Width] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
+    .Define("E1E9", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
         if (nhits == 0)
             return 0.0;
@@ -341,8 +347,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         unordered_map<Int_t, Double_t> map_cellid;
         for (Int_t i = 0; i < nhits; i++)
         {
-            Int_t x = round((Hit_X_nonzero.at(i) + Bias) / Width);
-            Int_t y = round((Hit_Y_nonzero.at(i) + Bias) / Width);
+            Int_t x = round((Hit_X_nonzero.at(i) + BiasX) / PeriodX);
+            Int_t y = round((Hit_Y_nonzero.at(i) + BiasX) / PeriodY);
             Int_t z = layer.at(i);
             Int_t index = z * 100000 + x * 100 + y;
             map_cellid[index] += Hit_Energy_nonzero.at(i);
@@ -351,8 +357,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         {
             if (Hit_Energy_nonzero.at(j) == 0.0)
                 continue;
-            Int_t x = round((Hit_X_nonzero.at(j) + Bias) / Width);
-            Int_t y = round((Hit_Y_nonzero.at(j) + Bias) / Width);
+            Int_t x = round((Hit_X_nonzero.at(j) + BiasX) / PeriodX);
+            Int_t y = round((Hit_Y_nonzero.at(j) + BiasY) / PeriodY);
             Int_t z = layer.at(j);
             Int_t index = z * 100000 + x * 100 + y;
             Double_t tempE1 = map_cellid[index];
@@ -375,7 +381,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return E1E9;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
     // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 5*5 cells around it
-    .Define("E9E25", [Bias, Width] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
+    .Define("E9E25", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
         if (nhits == 0)
             return 0.0;
@@ -383,8 +389,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         unordered_map<Int_t, Double_t> map_cellid;
         for (Int_t i = 0; i < nhits; i++)
         {
-            Int_t x = round((Hit_X_nonzero.at(i) + Bias) / Width);
-            Int_t y = round((Hit_Y_nonzero.at(i) + Bias) / Width);
+            Int_t x = round((Hit_X_nonzero.at(i) + BiasX) / PeriodX);
+            Int_t y = round((Hit_Y_nonzero.at(i) + BiasY) / PeriodY);
             Int_t z = layer.at(i);
             Int_t index = z * 100000 + x * 100 + y;
             map_cellid[index] += Hit_Energy_nonzero.at(i);
@@ -393,8 +399,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         {
             if (Hit_Energy_nonzero.at(j) == 0.0)
                 continue;
-            Int_t x = round((Hit_X_nonzero.at(j) + Bias) / Width);
-            Int_t y = round((Hit_Y_nonzero.at(j) + Bias) / Width);
+            Int_t x = round((Hit_X_nonzero.at(j) + BiasX) / PeriodX);
+            Int_t y = round((Hit_Y_nonzero.at(j) + BiasY) / PeriodY);
             Int_t z = layer.at(j);
             Int_t index = z * 100000 + x * 100 + y;
             Double_t tempE9 = map_cellid[index];
@@ -419,7 +425,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return E9E25;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
     // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 7*7 cells around it
-    .Define("E9E49", [Bias, Width] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
+    .Define("E9E49", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
         if (nhits == 0)
             return 0.0;
@@ -427,8 +433,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         unordered_map<Int_t, Double_t> map_cellid;
         for (Int_t i = 0; i < nhits; i++)
         {
-            Int_t x = round((Hit_X_nonzero.at(i) + Bias) / Width);
-            Int_t y = round((Hit_Y_nonzero.at(i) + Bias) / Width);
+            Int_t x = round((Hit_X_nonzero.at(i) + BiasX) / PeriodX);
+            Int_t y = round((Hit_Y_nonzero.at(i) + BiasY) / PeriodY);
             Int_t z = layer.at(i);
             Int_t index = z * 100000 + x * 100 + y;
             map_cellid[index] += Hit_Energy_nonzero.at(i);
@@ -437,8 +443,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         {
             if (Hit_Energy_nonzero.at(j) == 0.0)
                 continue;
-            Int_t x = round((Hit_X_nonzero.at(j) + Bias) / Width);
-            Int_t y = round((Hit_Y_nonzero.at(j) + Bias) / Width);
+            Int_t x = round((Hit_X_nonzero.at(j) + BiasX) / PeriodX);
+            Int_t y = round((Hit_Y_nonzero.at(j) + BiasY) / PeriodY);
             Int_t z = layer.at(j);
             Int_t index = z * 100000 + x * 100 + y;
             Double_t tempE9 = map_cellid[index];
@@ -466,7 +472,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     .Define("shower_length", [] (vector<Double_t> layer_rms, Int_t shower_start)
     {
         Double_t shower_length = 0.0;
-        Double_t startz = shower_start * thick;
+        Double_t startz = shower_start * Thick;
         Int_t max_layer = 0;
         Double_t max_rms = 0.0;
         for (Int_t i = 0; i < layer_rms.size(); i++)
@@ -480,7 +486,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         if (shower_start >= max_layer)
             shower_length = 0.0;
         else
-            shower_length = (max_layer - shower_start) * thick;
+            shower_length = (max_layer - shower_start) * Thick;
         return shower_length;
     }, {"layer_rms", "shower_start"})
     // 2-dimensional fractal dimension
@@ -564,7 +570,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // Centre of gravity of each layer, in x direction
     .Define("COG_X", [] (vector<Double_t> Hit_X_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
     {
-        vector<Double_t> cog_x(nlayer);
+        vector<Double_t> cog_x(nLayer);
         for (Int_t i = 0; i < nhits; i++)
             cog_x.at(layer.at(i)) += Hit_X_nonzero.at(i) * Hit_Energy_nonzero.at(i);
         for (Int_t j = 0; j < cog_x.size(); j++)
@@ -579,7 +585,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // Centre of gravity of each layer, in y direction
     .Define("COG_Y", [] (vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
     {
-        vector<Double_t> cog_y(nlayer);
+        vector<Double_t> cog_y(nLayer);
         for (Int_t i = 0; i < nhits; i++)
             cog_y.at(layer.at(i)) += Hit_Y_nonzero.at(i) * Hit_Energy_nonzero.at(i);
         for (Int_t j = 0; j < cog_y.size(); j++)
@@ -591,59 +597,59 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         }
         return cog_y;
     }, {"Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
-    // Centre of gravity of every 4 layers, in x direction
-    .Define("COG_X_4", [] (vector<Double_t> Hit_X_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
+    // Centre of gravity of every 5 layers, in x direction
+    .Define("COG_X_5", [] (vector<Double_t> Hit_X_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
     {
-        vector<Double_t> cog_x_4(nlayer / 4);
-        vector<Double_t> energy_4layer(nlayer / 4);
+        vector<Double_t> cog_x_5(nLayer / 5);
+        vector<Double_t> energy_5layer(nLayer / 5);
         for (Int_t i = 0; i < nhits; i++)
-            cog_x_4.at(layer.at(i) / 4) += Hit_X_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-        for (Int_t j = 0; j < nlayer; j++)
-            energy_4layer.at(j / 4) += layer_energy.at(j);
-        for (Int_t k = 0; k < nlayer / 4; k++)
+            cog_x_5.at(layer.at(i) / 5) += Hit_X_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+        for (Int_t j = 0; j < nLayer; j++)
+            energy_5layer.at(j / 5) += layer_energy.at(j);
+        for (Int_t k = 0; k < nLayer / 5; k++)
         {
-            if (cog_x_4.at(k) == 0)
+            if (cog_x_5.at(k) == 0)
                 continue;
             else
-                cog_x_4.at(k) /= energy_4layer.at(k);
+                cog_x_5.at(k) /= energy_5layer.at(k);
         }
-        return cog_x_4;
+        return cog_x_5;
     }, {"Hit_X_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
-    // Centre of gravity of every 4 layers, in y direction
-    .Define("COG_Y_4", [] (vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
+    // Centre of gravity of every 5 layers, in y direction
+    .Define("COG_Y_5", [] (vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
     {
-        vector<Double_t> cog_y_4(nlayer / 4);
-        vector<Double_t> energy_4layer(nlayer / 4);
+        vector<Double_t> cog_y_5(nLayer / 5);
+        vector<Double_t> energy_5layer(nLayer / 5);
         for (Int_t i = 0; i < nhits; i++)
-            cog_y_4.at(layer.at(i) / 4) += Hit_Y_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-        for (Int_t j = 0; j < nlayer; j++)
-            energy_4layer.at(j / 4) += layer_energy.at(j);
-        for (Int_t k = 0; k < nlayer / 4; k++)
+            cog_y_5.at(layer.at(i) / 5) += Hit_Y_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+        for (Int_t j = 0; j < nLayer; j++)
+            energy_5layer.at(j / 5) += layer_energy.at(j);
+        for (Int_t k = 0; k < nLayer / 5; k++)
         {
-            if (cog_y_4.at(k) == 0)
+            if (cog_y_5.at(k) == 0)
                 continue;
             else
-                cog_y_4.at(k) /= energy_4layer.at(k);
+                cog_y_5.at(k) /= energy_5layer.at(k);
         }
-        return cog_y_4;
+        return cog_y_5;
     }, {"Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
-    // Centre of gravity of every 4 layers, in z direction
-    .Define("COG_Z_4", [] (vector<Double_t> Hit_Z_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
+    // Centre of gravity of every 5 layers, in z direction
+    .Define("COG_Z_5", [] (vector<Double_t> Hit_Z_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
     {
-        vector<Double_t> cog_z_4(nlayer / 4);
-        vector<Double_t> energy_4layer(nlayer / 4);
+        vector<Double_t> cog_z_5(nLayer / 5);
+        vector<Double_t> energy_5layer(nLayer / 5);
         for (Int_t i = 0; i < nhits; i++)
-            cog_z_4.at(layer.at(i) / 4) += Hit_Z_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-        for (Int_t j = 0; j < nlayer; j++)
-            energy_4layer.at(j / 4) += layer_energy.at(j);
-        for (Int_t k = 0; k < nlayer / 4; k++)
+            cog_z_5.at(layer.at(i) / 5) += Hit_Z_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+        for (Int_t j = 0; j < nLayer; j++)
+            energy_5layer.at(j / 5) += layer_energy.at(j);
+        for (Int_t k = 0; k < nLayer / 5; k++)
         {
-            if (cog_z_4.at(k) == 0)
+            if (cog_z_5.at(k) == 0)
                 continue;
             else
-                cog_z_4.at(k) /= energy_4layer.at(k);
+                cog_z_5.at(k) /= energy_5layer.at(k);
         }
-        return cog_z_4;
+        return cog_z_5;
     }, {"Hit_Z_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
     // The overall centre of gravity, in x direction
     .Define("COG_X_overall", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
@@ -691,45 +697,45 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     .Define("hclx", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero)
     {
         vector<Double_t> hclx;
-        Hough* httool = new Hough(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, Hit_Energy_nonzero);
-        hclx = httool->GetHclX();
-        delete httool;
+        Hough* hough = new Hough(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, Hit_Energy_nonzero);
+        hclx = hough->GetHclX();
+        delete hough;
         return hclx;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "Hit_Energy_nonzero"})
     // 
     .Define("hcly", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero)
     {
         vector<Double_t> hcly;
-        Hough* httool = new Hough(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, Hit_Energy_nonzero);
-        hcly = httool->GetHclY();
-        delete httool;
+        Hough* hough = new Hough(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, Hit_Energy_nonzero);
+        hcly = hough->GetHclY();
+        delete hough;
         return hcly;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "Hit_Energy_nonzero"})
     // 
     .Define("hclz", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero)
     {
         vector<Double_t> hclz;
-        Hough* httool = new Hough(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, Hit_Energy_nonzero);
-        hclz = httool->GetHclZ();
-        delete httool;
+        Hough* hough = new Hough(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, Hit_Energy_nonzero);
+        hclz = hough->GetHclZ();
+        delete hough;
         return hclz;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "Hit_Energy_nonzero"})
     //
     .Define("hcle", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero)
     {
         vector<Double_t> hcle;
-        Hough* httool = new Hough(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, Hit_Energy_nonzero);
-        hcle = httool->GetHclE();
-        delete httool;
+        Hough* hough = new Hough(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, Hit_Energy_nonzero);
+        hcle = hough->GetHclE();
+        delete hough;
         return hcle;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "Hit_Energy_nonzero"})
     // The number of tracks of an event, with Hough transformation applied
     .Define("ntrack", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero)
     {
         Int_t ntrack = 0;
-        Hough* httool = new Hough(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, Hit_Energy_nonzero);
-        ntrack = httool->GetNtrack();
-        delete httool;
+        Hough* hough = new Hough(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, Hit_Energy_nonzero);
+        ntrack = hough->GetNtrack();
+        delete hough;
         return ntrack;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "Hit_Energy_nonzero"})
     /*
