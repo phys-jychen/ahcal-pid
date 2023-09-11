@@ -20,29 +20,49 @@ to display help information.  For more detail, please refer to the following ins
 ### Selecting Hits
 In MC samples or even real data, a large number of hits do not deposit energy in the scintillator.  These hits are not useful in our analysis and should be discarded.  To achieve this, run
 ```shell
+iSel -f [file]
+```
+if the tree in the original ROOT file has default name `Calib_Hit`.  Otherwise, to specify other names, run
+```shell
 iSel -f [file] -t [tree]
 ```
-After the program finishes, an output file whose name has a prefix "sel" is created. The original branches have already been deleted.
+
+After the program finishes, an output file whose name has a prefix "sel" is created in your current directory, regardless of where the original ROOT file is.  The original branches have already been deleted to save space.
 
 ### Adding Reconstructed Variables
-In the directory of the ROOT file to be analyses, execute:
+In any directory, execute:
+```shell
+iRec -f [file]
+```
+if the tree in the original ROOT file has default name `Calib_Hit`.  Otherwise, to specify other names, run
 ```shell
 iRec -f [file] -t [tree]
 ```
-The name of the output file is given a prefix "pid", and the original branches are not kept.  If you need to add some new variables or modify the definitions of some of them, please go to the file `src/Variables.cxx`.
+
+The name of the output file is given a prefix "pid" in your current directory, and the original branches are not kept for the sake of saving space.  If you need to add some new variables or modify the definitions of some of them, please go to the file `src/Variables.cxx`.
 
 ### Performing BDT
 Before you begin, make sure that the variables as well as the ROOT files listed in `bdt.cxx` are all present (you can also modify this file to meet your own needs).  Then, execute:
 ```shell
+iBDT -r
+```
+if the trees in the original ROOT files all have default name `Calib_Hit`.  Otherwise, to specify other names, run
+```shell
 iBDT -r -t [tree]
 ```
-Eventually you can see the output file containing the data obtained during training and test (`TMVAMulticlass.root`).
+
+Eventually you can see the output file containing the data obtained during training and test (`TMVAMulticlass.root`) in your current directory.
 
 Possibly you need to know the performance of BDT on the validation dataset.  In this case, execute:
 ```shell
+iBDT -v -f [file]
+```
+if the tree in the original ROOT file has default name `Calib_Hit`.  Otherwise, to specify other names, run
+```shell
 iBDT -v -f [file] -t [tree]
 ```
-Then the BDT response is stored in the output ROOT file, whose name has prefix "bdt".  Possibly it is necessary to modify `src/BDT.cxx`.  Anyway, make sure that the input variables are exactly the same as those in `bdt.cxx`!
+
+Then the BDT response is stored in the output ROOT file, whose name has a prefix "bdt", in your current directory.  Possibly it is necessary to modify `src/BDT.cxx`.  Anyway, make sure that the input variables are exactly the same as those in `bdt.cxx`!
 
 ## Environment Set-up
 This project requires CMake version >= 3.17.  If you are working on the cluster of INPAC, IHEP, etc., the environment can be easily set up by simply executing
@@ -67,7 +87,7 @@ source setup.sh
 
 Every time you log in to the cluster, before the first time of running this program, remember to execute
 ```shell
-source [build]/setup.sh
+source <build_dir>/setup.sh
 ```
 
 By now, the compilation have been finished.  Prepare your datasets, and have fun!
