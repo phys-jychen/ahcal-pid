@@ -794,7 +794,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         t->SetBranchStatus(de, 0);
     TFile* fnew = new TFile((TString) outname, "RECREATE");
     TTree* tnew = t->CloneTree();
-    tnew->Write();
+    tnew->Write(0, TObject::kWriteDelete, 0);
     f->Close();
     fnew->Close();
 
