@@ -3,7 +3,7 @@ using namespace std;
 
 Int_t main(Int_t argc, char* argv[])
 {
-    string file = "", tree = "";
+    string file = "", tree = "Calib_Hit";
     Int_t train = 0, bdt = 0, help = 0;
 
     for (Int_t i = 1; i < argc; i++)
@@ -13,10 +13,18 @@ Int_t main(Int_t argc, char* argv[])
             help = 1;
             cout << endl;
             cout << "Help information" << endl << endl;
-            cout << "Discard hits with E = 0: iSel -f [file] -t [tree]" << endl;
-            cout << "Reconstruct variables:   iRec -f [file] -t [tree]" << endl;
-            cout << "PID with BDT:            iBDT -r -t [tree]" << endl;
-            cout << "Classification:          iBDT -v -f [file] -t [tree]" << endl << endl;
+            cout << "Discard hits with E = 0:" << endl;
+            cout << "    With default tree \"Calib_Hit\": iSel -f [file]" << endl;
+            cout << "    With other specified tree:     iSel -f [file] -t [tree]" << endl;
+            cout << "Reconstruct variables:" << endl;
+            cout << "    With default tree \"Calib_Hit\": iRec -f [file]" << endl;
+            cout << "    With other specified tree:     iRec -f [file] -t [tree]" << endl;
+            cout << "PID with BDT:" << endl;
+            cout << "    With default tree \"Calib_Hit\": iBDT -r" << endl;
+            cout << "    With other specified tree:     iBDT -r -t [tree]" << endl;
+            cout << "Classification:" << endl;
+            cout << "    With default tree \"Calib_Hit\": iBDT -v f [file]" << endl;
+            cout << "    With other specified tree:     iBDT -f [file] -t [tree]" << endl << endl;
             break;
         }
 
@@ -35,7 +43,7 @@ Int_t main(Int_t argc, char* argv[])
 
     BDT* b = new BDT();
 
-    if (train == 1 && tree != "")
+    if (train == 1)
     {
         cout << "-----> Training and testing..." << endl;
         cout << "-----> Tree: " << tree << endl;
@@ -71,21 +79,21 @@ Int_t main(Int_t argc, char* argv[])
         b->AddVar("zwidth",             'D');
 
         // Signal
-        b->AddTrainSig("/lustre/collider/chenjiyuan/ahcal-pid/build/test/pid_train_pion.root", tree);
-        b->AddTestSig ("/lustre/collider/chenjiyuan/ahcal-pid/build/test/pid_test_pion.root",  tree);
+        b->AddTrainSig("/lustre/collider/chenjiyuan/ahcal-pid/build/test/pid_sel_train_pion.root", tree);
+        b->AddTestSig ("/lustre/collider/chenjiyuan/ahcal-pid/build/test/pid_sel_test_pion.root",  tree);
 
         // Background
-        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/build/test/pid_train_muon.root", tree);
-        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/build/test/pid_train_e.root",    tree);
-        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/build/test/pid_test_muon.root",  tree);
-        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/build/test/pid_test_e.root",     tree);
+        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/build/test/pid_sel_train_muon.root", tree);
+        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/build/test/pid_sel_train_e.root",    tree);
+        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/build/test/pid_sel_test_muon.root",  tree);
+        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/build/test/pid_sel_test_e.root",     tree);
 
         b->TrainBDT();
 
         cout << "-----> Training and testing finished!" << endl;
 	}
 
-    else if (bdt == 1 && file != "" && tree != "")
+    else if (bdt == 1 && file != "")
     {
         cout << "-----> Classifying..." << endl;
         cout << "-----> File: " << file << endl;
@@ -99,7 +107,7 @@ Int_t main(Int_t argc, char* argv[])
     else if (help == 0)
     {
         cout << "Invalid input." << endl;
-        cout << "Run \"iBDT -h[elp]\" to display help information." << endl;
+        cout << "Run \"iBDT -h[elp]\" to display help information." << endl << endl;
     }
 
     delete b;

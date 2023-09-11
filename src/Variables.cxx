@@ -8,7 +8,10 @@ Int_t NHScaleV2(RVec<Double_t> const& pos_x, RVec<Double_t> const& pos_y, RVec<D
     Int_t tmpK = 0;
     Double_t tmpEn = 0;
     Int_t NewCellID0 = 0;
-    const Double_t Bias = -342.55;
+    // Cell width =  40 mm: Bias = 342.55 mm, Width =  40.3 mm
+    // Cell width =  80 mm: Bias = 321.2  mm, Width =  80.3 mm
+    // Cell width = 120 mm: Bias = 300.75 mm, Width = 120.3 mm
+    const Double_t Bias = 342.55;
     const Double_t Width = 40.3;
     const Double_t Thick = 30;
     const Int_t NumHit = pos_x.size();
@@ -21,8 +24,8 @@ Int_t NHScaleV2(RVec<Double_t> const& pos_x, RVec<Double_t> const& pos_y, RVec<D
         Double_t y = pos_y.at(i);
         Double_t z = pos_z.at(i);
 
-        tmpI = (Int_t ((x - Bias) / Width) + Int_t(Abs(x) / x)) / RatioX;
-        tmpJ = (Int_t ((y - Bias) / Width) + Int_t(Abs(y) / y)) / RatioY;
+        tmpI = (Int_t ((x + Bias) / Width) + Int_t(Abs(x) / x)) / RatioX;
+        tmpJ = (Int_t ((y + Bias) / Width) + Int_t(Abs(y) / y)) / RatioY;
         tmpK = (Int_t) (z / Thick) / RatioZ;
         tmpEn = 1;
 
@@ -44,6 +47,11 @@ Variables::~Variables() {}
 
 Int_t Variables::GenNtuple(const string& file, const string& tree)
 {
+    // Cell width =  40 mm: Bias = 342.55 mm, Width =  40.3 mm
+    // Cell width =  80 mm: Bias = 321.2  mm, Width =  80.3 mm
+    // Cell width = 120 mm: Bias = 300.75 mm, Width = 120.3 mm
+    const Double_t Bias = 342.55;
+    const Double_t Width = 40.3;
     const Int_t nlayer = 40;
     const Int_t thick = 30;
     //EnableImplicitMT();
@@ -289,16 +297,14 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // The proportion of layers with xwidth, ywidth >= 60 mm within the layers with at least one hit
     .Define("shower_layer_ratio", "shower_layer / hit_layer")
     // Average number of hits in the 3*3 cells around a given one
-    .Define("shower_density", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
+    .Define("shower_density", [Bias, Width] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
-        const Double_t bias = 342.55;
-        const Double_t width = 40.3;
         Double_t shower_density = 0.0;
         unordered_map<Int_t, Int_t> map_CellID;
         for (Int_t j = 0; j < nhits; j++)
         {
-            Int_t x = round((Hit_X_nonzero.at(j) + bias) / width);
-            Int_t y = round((Hit_Y_nonzero.at(j) + bias) / width);
+            Int_t x = round((Hit_X_nonzero.at(j) + Bias) / Width);
+            Int_t y = round((Hit_Y_nonzero.at(j) + Bias) / Width);
             Int_t z = layer.at(j);
             Int_t index = z * 100000 + x * 100 + y;
             map_CellID[index] += 1;
@@ -307,8 +313,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         {
             if (Hit_Energy_nonzero.at(i) == 0.0)
                 continue;
-            Int_t x = round((Hit_X_nonzero.at(i) + bias) / width);
-            Int_t y = round((Hit_Y_nonzero.at(i) + bias) / width);
+            Int_t x = round((Hit_X_nonzero.at(i) + Bias) / Width);
+            Int_t y = round((Hit_Y_nonzero.at(i) + Bias) / Width);
             Int_t z = layer.at(i);
             for (Int_t ix = x - 1; ix <= x + 1; ix++)
             {
@@ -327,18 +333,16 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return shower_density;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
     // Energy deposition of the central cell divided by the total energy deposition in the 3*3 cells around it
-    .Define("E1E9", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
+    .Define("E1E9", [Bias, Width] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
         if (nhits == 0)
             return 0.0;
-        const Double_t bias = 342.55;
-        const Double_t width = 40.3;
         Double_t E1E9 = 0.0;
         unordered_map<Int_t, Double_t> map_cellid;
         for (Int_t i = 0; i < nhits; i++)
         {
-            Int_t x = round((Hit_X_nonzero.at(i) + bias) / width);
-            Int_t y = round((Hit_Y_nonzero.at(i) + bias) / width);
+            Int_t x = round((Hit_X_nonzero.at(i) + Bias) / Width);
+            Int_t y = round((Hit_Y_nonzero.at(i) + Bias) / Width);
             Int_t z = layer.at(i);
             Int_t index = z * 100000 + x * 100 + y;
             map_cellid[index] += Hit_Energy_nonzero.at(i);
@@ -347,8 +351,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         {
             if (Hit_Energy_nonzero.at(j) == 0.0)
                 continue;
-            Int_t x = round((Hit_X_nonzero.at(j) + bias) / width);
-            Int_t y = round((Hit_Y_nonzero.at(j) + bias) / width);
+            Int_t x = round((Hit_X_nonzero.at(j) + Bias) / Width);
+            Int_t y = round((Hit_Y_nonzero.at(j) + Bias) / Width);
             Int_t z = layer.at(j);
             Int_t index = z * 100000 + x * 100 + y;
             Double_t tempE1 = map_cellid[index];
@@ -371,18 +375,16 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return E1E9;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
     // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 5*5 cells around it
-    .Define("E9E25", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
+    .Define("E9E25", [Bias, Width] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
         if (nhits == 0)
             return 0.0;
-        const Double_t bias = 342.55;
-        const Double_t width = 40.3;
         Double_t E9E25 = 0.0;
         unordered_map<Int_t, Double_t> map_cellid;
         for (Int_t i = 0; i < nhits; i++)
         {
-            Int_t x = round((Hit_X_nonzero.at(i) + bias) / width);
-            Int_t y = round((Hit_Y_nonzero.at(i) + bias) / width);
+            Int_t x = round((Hit_X_nonzero.at(i) + Bias) / Width);
+            Int_t y = round((Hit_Y_nonzero.at(i) + Bias) / Width);
             Int_t z = layer.at(i);
             Int_t index = z * 100000 + x * 100 + y;
             map_cellid[index] += Hit_Energy_nonzero.at(i);
@@ -391,8 +393,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         {
             if (Hit_Energy_nonzero.at(j) == 0.0)
                 continue;
-            Int_t x = round((Hit_X_nonzero.at(j) + bias) / width);
-            Int_t y = round((Hit_Y_nonzero.at(j) + bias) / width);
+            Int_t x = round((Hit_X_nonzero.at(j) + Bias) / Width);
+            Int_t y = round((Hit_Y_nonzero.at(j) + Bias) / Width);
             Int_t z = layer.at(j);
             Int_t index = z * 100000 + x * 100 + y;
             Double_t tempE9 = map_cellid[index];
@@ -417,18 +419,16 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return E9E25;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
     // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 7*7 cells around it
-    .Define("E9E49", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
+    .Define("E9E49", [Bias, Width] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
         if (nhits == 0)
             return 0.0;
-        const Double_t bias = 342.55;
-        const Double_t width = 40.3;
         Double_t E9E49 = 0.0;
         unordered_map<Int_t, Double_t> map_cellid;
         for (Int_t i = 0; i < nhits; i++)
         {
-            Int_t x = round((Hit_X_nonzero.at(i) + bias) / width);
-            Int_t y = round((Hit_Y_nonzero.at(i) + bias) / width);
+            Int_t x = round((Hit_X_nonzero.at(i) + Bias) / Width);
+            Int_t y = round((Hit_Y_nonzero.at(i) + Bias) / Width);
             Int_t z = layer.at(i);
             Int_t index = z * 100000 + x * 100 + y;
             map_cellid[index] += Hit_Energy_nonzero.at(i);
@@ -437,8 +437,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         {
             if (Hit_Energy_nonzero.at(j) == 0.0)
                 continue;
-            Int_t x = round((Hit_X_nonzero.at(j) + bias) / width);
-            Int_t y = round((Hit_Y_nonzero.at(j) + bias) / width);
+            Int_t x = round((Hit_X_nonzero.at(j) + Bias) / Width);
+            Int_t y = round((Hit_Y_nonzero.at(j) + Bias) / Width);
             Int_t z = layer.at(j);
             Int_t index = z * 100000 + x * 100 + y;
             Double_t tempE9 = map_cellid[index];

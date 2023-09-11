@@ -3,7 +3,7 @@ using namespace std;
 
 Int_t main(Int_t argc, char* argv[])
 {
-    string file = "", tree = "";
+    string file = "", tree = "Calib_Hit";
     Int_t help = 0;
 
     for (Int_t i = 1; i < argc; i++)
@@ -13,10 +13,18 @@ Int_t main(Int_t argc, char* argv[])
             help = 1;
             cout << endl;
             cout << "Help information" << endl << endl;
-            cout << "Discard hits with E = 0: iSel -f [file] -t [tree]" << endl;
-            cout << "Reconstruct variables:   iRec -f [file] -t [tree]" << endl;
-            cout << "PID with BDT:            iBDT -r -t [tree]" << endl;
-            cout << "Classification:          iBDT -v -f [file] -t [tree]" << endl << endl;
+            cout << "Discard hits with E = 0:" << endl;
+            cout << "    With default tree \"Calib_Hit\": iSel -f [file]" << endl;
+            cout << "    With other specified tree:     iSel -f [file] -t [tree]" << endl;
+            cout << "Reconstruct variables:" << endl;
+            cout << "    With default tree \"Calib_Hit\": iRec -f [file]" << endl;
+            cout << "    With other specified tree:     iRec -f [file] -t [tree]" << endl;
+            cout << "PID with BDT:" << endl;
+            cout << "    With default tree \"Calib_Hit\": iBDT -r" << endl;
+            cout << "    With other specified tree:     iBDT -r -t [tree]" << endl;
+            cout << "Classification:" << endl;
+            cout << "    With default tree \"Calib_Hit\": iBDT -v f [file]" << endl;
+            cout << "    With other specified tree:     iBDT -f [file] -t [tree]" << endl << endl;
             break;
         }
 
@@ -29,7 +37,7 @@ Int_t main(Int_t argc, char* argv[])
 
     Select* s = new Select();
 
-    if (file != "" && tree != "")
+    if (file != "")
     {
         cout << "-----> Discarding empty hits..." << endl;
         cout << "-----> File: " << file << endl;
