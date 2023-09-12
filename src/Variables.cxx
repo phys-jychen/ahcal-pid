@@ -12,9 +12,9 @@ const Double_t PeriodX = CellWidthX + gapX;
 const Double_t PeriodY = CellWidthY + gapY;
 const Double_t Thick = 30;
 
-const Double_t nCellX = 18;
-const Double_t nCellY = 18;
-const Double_t nLayer = 40;
+const Int_t nCellX = 18;
+const Int_t nCellY = 18;
+const Int_t nLayer = 40;
 
 const Double_t BiasX = 0.5 * (nCellX - 1) * PeriodX;
 const Double_t BiasY = 0.5 * (nCellY - 1) * PeriodY;
@@ -60,51 +60,13 @@ Variables::~Variables() {}
 
 Int_t Variables::GenNtuple(const string& file, const string& tree)
 {
-    //EnableImplicitMT();
+//    EnableImplicitMT();
     DisableImplicitMT();
     RDataFrame* dm = new RDataFrame(tree, file);
     string outname = file;
     outname = outname.substr(outname.find_last_of('/') + 1);
     outname = "pid_" + outname;
     auto fout = dm->Define("nhits", "(Int_t) Hit_X_nonzero.size()")
-    // Theta of the hits [spherical co-ordinate, origin = (0, 0, 0)]
-    .Define("Hit_Theta", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, Int_t nhits)
-    {
-        vector<Double_t> theta = {};
-        for (Int_t i = 0; i < nhits; i++)
-        {
-            if (Hit_Z_nonzero.at(i) == 0)
-                theta.emplace_back(PiOver2());
-            else
-            {
-                Double_t rho = Sqrt(Power(Hit_X_nonzero.at(i), 2) + Power(Hit_Y_nonzero.at(i), 2));
-                Double_t angle = ATan2(rho, Hit_Z_nonzero.at(i));
-                theta.emplace_back(angle);
-            }
-        }
-        return theta;
-    }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "nhits"})
-    // Phi of the hits [spherical co-ordinate, origin = (0, 0, 0)]
-    .Define("Hit_Phi", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, Int_t nhits)
-    {
-        vector<Double_t> phi = {};
-        for (Int_t i = 0; i < nhits; i++)
-        {
-            if (Hit_X_nonzero.at(i) == 0)
-            {
-                if (Hit_Y_nonzero.at(i) >= 0)
-                    phi.emplace_back(0);
-                else
-                    phi.emplace_back(Pi());
-            }
-            else
-            {
-                Double_t angle = ATan2(Hit_Y_nonzero.at(i), Hit_X_nonzero.at(i));
-                phi.emplace_back(angle);
-            }
-        }
-        return phi;
-    }, {"Hit_X_nonzero", "Hit_Y_nonzero", "nhits"})
     // Transfer z position to the layer number
     .Define("layer", [] (vector<Double_t> Hit_Z_nonzero, Int_t nhits)
     {
@@ -172,6 +134,107 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     }, {"Hit_Energy_nonzero"})
     // Average energy deposition of the hits
     .Define("Emean", "Edep / nhits")
+    // The energy deposition of the fired cells
+    .Define("Ecell", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
+    {
+        vector<vector<Double_t>> Ecell = { {}, {} };
+        for (Int_t i = 0; i < nhits; i++)
+        {
+            Int_t x = round((Hit_X_nonzero.at(i) + BiasX) / PeriodX);
+            Int_t y = round((Hit_Y_nonzero.at(i) + BiasY) / PeriodY);
+            Int_t index = 100000 * layer.at(i) + 100 * x + y;
+            Ecell.at(0).emplace_back(index);
+            Ecell.at(1).emplace_back(Hit_Energy_nonzero.at(i));
+        }
+        return Ecell;
+    }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
+    // The maximum energy deposition of the fired cells
+    .Define("Ecell_max", [] (vector<vector<Double_t>> Ecell)
+    {
+        Double_t Ecell_max = *max_element(Ecell.at(1).begin(), Ecell.at(1).end());
+        return Ecell_max;
+    }, {"Ecell"})
+    // The ID of the cell with maximum energy deposition
+    .Define("Ecell_max_id", [] (vector<vector<Double_t>> Ecell)
+    {
+        Int_t Ecell_max_id = max_element(Ecell.at(1).begin(), Ecell.at(1).end()) - Ecell.at(1).begin();
+        return (Int_t) Ecell.at(0).at(Ecell_max_id);
+    }, {"Ecell"})
+    // The energy deposition in the 3*3 cells around the one with maximum energy deposition
+    .Define("Ecell_max_9", [] (vector<vector<Double_t>> Ecell, Int_t Ecell_max_id)
+    {
+        Double_t Ecell_max_9 = 0.0;
+        Int_t z = Ecell_max_id / 100000;
+        Int_t x = (Ecell_max_id % 100000) / 100;
+        Int_t y = Ecell_max_id % 100;
+        for (Int_t ix = x - 1; ix <= x + 1; ix++)
+        {
+            if (ix < 0 || ix >= nCellX)
+                continue;
+            for (Int_t iy = y - 1; iy <= y + 1; iy++)
+            {
+                if (iy < 0 || iy >= nCellY)
+                    continue;
+                Int_t tmp = z * 100000 + ix * 100 + iy;
+                auto itr = find(Ecell.at(0).begin(), Ecell.at(0).end(), tmp);
+                Int_t index = distance(Ecell.at(0).begin(), itr);
+                if (index >= Ecell.at(0).size())
+                    continue;
+                Ecell_max_9 += Ecell.at(1).at(index);
+            }
+        }
+        return Ecell_max_9;
+    }, {"Ecell", "Ecell_max_id"})
+    // The energy deposition in the 5*5 cells around the one with maximum energy deposition
+    .Define("Ecell_max_25", [] (vector<vector<Double_t>> Ecell, Int_t Ecell_max_id)
+    {
+        Double_t Ecell_max_25 = 0.0;
+        Int_t z = Ecell_max_id / 100000;
+        Int_t x = (Ecell_max_id % 100000) / 100;
+        Int_t y = Ecell_max_id % 100;
+        for (Int_t ix = x - 2; ix <= x + 2; ix++)
+        {
+            if (ix < 0 || ix >= nCellX)
+                continue;
+            for (Int_t iy = y - 2; iy <= y + 2; iy++)
+            {
+                if (iy < 0 || iy >= nCellY)
+                    continue;
+                Int_t tmp = z * 100000 + ix * 100 + iy;
+                auto itr = find(Ecell.at(0).begin(), Ecell.at(0).end(), tmp);
+                Int_t index = distance(Ecell.at(0).begin(), itr);
+                if (index >= Ecell.at(0).size())
+                    continue;
+                Ecell_max_25 += Ecell.at(1).at(index);
+            }
+        }
+        return Ecell_max_25;
+    }, {"Ecell", "Ecell_max_id"})
+    // The energy deposition in the 7*7 cells around the one with maximum energy deposition
+    .Define("Ecell_max_49", [] (vector<vector<Double_t>> Ecell, Int_t Ecell_max_id)
+    {
+        Double_t Ecell_max_49 = 0.0;
+        Int_t z = Ecell_max_id / 100000;
+        Int_t x = (Ecell_max_id % 100000) / 100;
+        Int_t y = Ecell_max_id % 100;
+        for (Int_t ix = x - 3; ix <= x + 3; ix++)
+        {
+            if (ix < 0 || ix >= nCellX)
+                continue;
+            for (Int_t iy = y - 3; iy <= y + 3; iy++)
+            {
+                if (iy < 0 || iy >= nCellY)
+                    continue;
+                Int_t tmp = z * 100000 + ix * 100 + iy;
+                auto itr = find(Ecell.at(0).begin(), Ecell.at(0).end(), tmp);
+                Int_t index = distance(Ecell.at(0).begin(), itr);
+                if (index >= Ecell.at(0).size())
+                    continue;
+                Ecell_max_49 += Ecell.at(1).at(index);
+            }
+        }
+        return Ecell_max_49;
+    }, {"Ecell", "Ecell_max_id"})
     // RMS value of the positions of all the hits on a layer
     .Define("layer_rms", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)->vector<Double_t>
     {
@@ -324,11 +387,11 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             Int_t z = layer.at(i);
             for (Int_t ix = x - 1; ix <= x + 1; ix++)
             {
-                if (ix < 0 || ix > 17)
+                if (ix < 0 || ix > nCellX - 1)
                     continue;
                 for (Int_t iy = y - 1; iy <= y + 1; iy++)
                 {
-                    if (iy < 0 || iy > 17)
+                    if (iy < 0 || iy > nCellY - 1)
                         continue;
                     Int_t tmp = z * 100000 + ix * 100 + iy;
                     shower_density += map_CellID[tmp];
@@ -339,135 +402,11 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return shower_density;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
     // Energy deposition of the central cell divided by the total energy deposition in the 3*3 cells around it
-    .Define("E1E9", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
-    {
-        if (nhits == 0)
-            return 0.0;
-        Double_t E1E9 = 0.0;
-        unordered_map<Int_t, Double_t> map_cellid;
-        for (Int_t i = 0; i < nhits; i++)
-        {
-            Int_t x = round((Hit_X_nonzero.at(i) + BiasX) / PeriodX);
-            Int_t y = round((Hit_Y_nonzero.at(i) + BiasX) / PeriodY);
-            Int_t z = layer.at(i);
-            Int_t index = z * 100000 + x * 100 + y;
-            map_cellid[index] += Hit_Energy_nonzero.at(i);
-        }
-        for (Int_t j = 0; j < nhits; j++)
-        {
-            if (Hit_Energy_nonzero.at(j) == 0.0)
-                continue;
-            Int_t x = round((Hit_X_nonzero.at(j) + BiasX) / PeriodX);
-            Int_t y = round((Hit_Y_nonzero.at(j) + BiasY) / PeriodY);
-            Int_t z = layer.at(j);
-            Int_t index = z * 100000 + x * 100 + y;
-            Double_t tempE1 = map_cellid[index];
-            Double_t tempE9 = map_cellid[index];
-            for (Int_t ix = x - 1; ix <= x + 1; ix++)
-            {
-                if (ix < 0 || ix > 17)
-                    continue;
-                for (Int_t iy = y - 1; iy <= y + 1; iy++)
-                {
-                    if (iy < 0 || iy > 17)
-                        continue;
-                    Int_t tmp = z * 100000 + ix * 100 + iy;
-                    tempE9 += map_cellid[tmp];
-                }
-            }
-            E1E9 += tempE1 / tempE9;
-        }
-        E1E9 /= nhits;
-        return E1E9;
-    }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
+    .Define("E1E9", "Ecell_max / Ecell_max_9")
     // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 5*5 cells around it
-    .Define("E9E25", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
-    {
-        if (nhits == 0)
-            return 0.0;
-        Double_t E9E25 = 0.0;
-        unordered_map<Int_t, Double_t> map_cellid;
-        for (Int_t i = 0; i < nhits; i++)
-        {
-            Int_t x = round((Hit_X_nonzero.at(i) + BiasX) / PeriodX);
-            Int_t y = round((Hit_Y_nonzero.at(i) + BiasY) / PeriodY);
-            Int_t z = layer.at(i);
-            Int_t index = z * 100000 + x * 100 + y;
-            map_cellid[index] += Hit_Energy_nonzero.at(i);
-        }
-        for (Int_t j = 0; j < nhits; j++)
-        {
-            if (Hit_Energy_nonzero.at(j) == 0.0)
-                continue;
-            Int_t x = round((Hit_X_nonzero.at(j) + BiasX) / PeriodX);
-            Int_t y = round((Hit_Y_nonzero.at(j) + BiasY) / PeriodY);
-            Int_t z = layer.at(j);
-            Int_t index = z * 100000 + x * 100 + y;
-            Double_t tempE9 = map_cellid[index];
-            Double_t tempE25 = map_cellid[index];
-            for (Int_t ix = x - 2; ix <= x + 2; ix++)
-            {
-                if (ix < 0 || ix > 17)
-                    continue;
-                for (Int_t iy = y - 2; iy <= y + 2; iy++)
-                {
-                    if (iy < 0 || iy > 17)
-                        continue;
-                    Int_t tmp = z * 100000 + ix * 100 + iy;
-                    if (ix >= x - 1 && ix <= x + 1 && iy >= y - 1 && iy <= y + 1)
-                        tempE9 += map_cellid[tmp];
-                    tempE25 += map_cellid[tmp];
-                }
-            }
-            E9E25 += tempE9 / tempE25;
-        }
-        E9E25 /= nhits;
-        return E9E25;
-    }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
+    .Define("E9E25", "Ecell_max_9 / Ecell_max_25")
     // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 7*7 cells around it
-    .Define("E9E49", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
-    {
-        if (nhits == 0)
-            return 0.0;
-        Double_t E9E49 = 0.0;
-        unordered_map<Int_t, Double_t> map_cellid;
-        for (Int_t i = 0; i < nhits; i++)
-        {
-            Int_t x = round((Hit_X_nonzero.at(i) + BiasX) / PeriodX);
-            Int_t y = round((Hit_Y_nonzero.at(i) + BiasY) / PeriodY);
-            Int_t z = layer.at(i);
-            Int_t index = z * 100000 + x * 100 + y;
-            map_cellid[index] += Hit_Energy_nonzero.at(i);
-        }
-        for (Int_t j = 0; j < nhits; j++)
-        {
-            if (Hit_Energy_nonzero.at(j) == 0.0)
-                continue;
-            Int_t x = round((Hit_X_nonzero.at(j) + BiasX) / PeriodX);
-            Int_t y = round((Hit_Y_nonzero.at(j) + BiasY) / PeriodY);
-            Int_t z = layer.at(j);
-            Int_t index = z * 100000 + x * 100 + y;
-            Double_t tempE9 = map_cellid[index];
-            Double_t tempE49 = map_cellid[index];
-            for (Int_t ix = x - 3; ix <= x + 3; ix++)
-            {
-                if (ix < 0 || ix > 17)
-                    continue;
-                for (Int_t iy = y - 3; iy <= y + 3; iy++)
-                {
-                    if (iy < 0 || iy > 17)
-                        continue;
-                    Int_t tmp = z * 100000 + ix * 100 + iy;
-                    if (ix >= x - 1 && ix <= x + 1 && iy >= y - 1 && iy <= y + 1)
-                        tempE9 += map_cellid[tmp];
-                    tempE49 += map_cellid[tmp];
-                }
-            }
-            E9E49 += tempE9 / tempE49;
-        }
-        E9E49 /= nhits;
-        return E9E49;
-    }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
+    .Define("E9E49", "Ecell_max_9 / Ecell_max_49")
     // The distance between the layer with largest RMS value of position and the beginning layer
     .Define("shower_length", [] (vector<Double_t> layer_rms, Int_t shower_start)
     {
@@ -788,14 +727,15 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             return Sqrt(tot2 / nhits);
     }, {"Hit_Time_nonzero", "layer", "shower_start", "shower_end", "nhits"})
     */
-    //.Range(1)
+//    .Range(1)
     .Snapshot(tree, outname);
     delete dm;
 
     TFile* f = new TFile((TString) outname, "READ");
     TTree* t = f->Get<TTree>((TString) tree);
     t->SetBranchStatus("*", 1);
-    vector<TString> deactivate = { "CellID", "Hit_Energy_nonzero", /*"Hit_Time_nonzero",*/ "Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero" };
+//    vector<TString> deactivate = { "CellID", "Hit_Energy_nonzero", "Hit_Phi_nonzero", "Hit_Theta_nonzero", "Hit_Time_nonzero", "Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero" };
+    vector<TString> deactivate = { "CellID", "Hit_Energy_nonzero", "Hit_Phi_nonzero", "Hit_Theta_nonzero", "Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero" };
     for (TString de : deactivate)
         t->SetBranchStatus(de, 0);
     TFile* fnew = new TFile((TString) outname, "RECREATE");
