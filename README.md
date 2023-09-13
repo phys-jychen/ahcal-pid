@@ -27,7 +27,7 @@ if the tree in the original ROOT file has default name `Calib_Hit`.  Otherwise, 
 iSel -f [file] -t [tree]
 ```
 
-After the program finishes, an output file whose name has a prefix "sel" is created in your current directory, regardless of where the original ROOT file is.  The original branches have already been deleted to save space.
+After the execution finishes, an output file whose name has a prefix "sel" is created in your current directory, regardless of where the original ROOT file is.  The original branches have already been deleted to save space.
 
 ### Adding Reconstructed Variables
 In any directory, execute:
@@ -39,7 +39,7 @@ if the tree in the original ROOT file has default name `Calib_Hit`.  Otherwise, 
 iRec -f [file] -t [tree]
 ```
 
-The name of the output file is given a prefix "pid" in your current directory, and the original branches are not kept for the sake of saving space.  If you need to add some new variables or modify the definitions of some of them, please go to the file `src/Variables.cxx`.
+The name of the output file is given a prefix "rec" in your current directory, and the original branches are not kept for the sake of saving space.  If you need to add some new variables or modify the definitions of some of them, please go to the file `src/Variables.cxx`.
 
 ### Performing BDT
 Before you begin, make sure that the variables as well as the ROOT files listed in `bdt.cxx` are all present (you can also modify this file to meet your own needs).  Then, execute:

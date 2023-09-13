@@ -89,7 +89,7 @@ Int_t BDT::TrainBDT()
     delete dataloader;
 
     // Launch the GUI for the root macros
-    //if (!gROOT->IsBatch()) TMVA::TMVAGui( outfileName );
+//    if (!gROOT->IsBatch()) TMVA::TMVAGui( outfileName );
 
     return 0;	
 }
@@ -115,9 +115,9 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     Float_t  bdt_COG_X_overall;
     Float_t  bdt_COG_Y_overall;
     Float_t  bdt_COG_Z_overall;
-//    Float_t  bdt_E1E9;
-//    Float_t  bdt_E9E25;
-//    Float_t  bdt_E9E49;
+    Float_t  bdt_E1E9;
+    Float_t  bdt_E9E25;
+    Float_t  bdt_E9E49;
     Float_t  bdt_Edep;
     Float_t  bdt_Emean;
     Float_t  bdt_FD_2D_mean;
@@ -145,9 +145,9 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     reader->AddVariable("COG_X_overall",      &bdt_COG_X_overall);
     reader->AddVariable("COG_Y_overall",      &bdt_COG_Y_overall);
     reader->AddVariable("COG_Z_overall",      &bdt_COG_Z_overall);
-//    reader->AddVariable("E1E9",               &bdt_E1E9);
-//    reader->AddVariable("E9E25",              &bdt_E9E25);
-//    reader->AddVariable("E9E49",              &bdt_E9E49);
+    reader->AddVariable("E1E9",               &bdt_E1E9);
+    reader->AddVariable("E9E25",              &bdt_E9E25);
+    reader->AddVariable("E9E49",              &bdt_E9E49);
     reader->AddVariable("Edep",               &bdt_Edep);
     reader->AddVariable("Emean",              &bdt_Emean);
     reader->AddVariable("FD_2D_mean",         &bdt_FD_2D_mean);
@@ -179,9 +179,9 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     rdf_input.emplace_back("COG_X_overall");
     rdf_input.emplace_back("COG_Y_overall");
     rdf_input.emplace_back("COG_Z_overall");
-//    rdf_input.emplace_back("E1E9");
-//    rdf_input.emplace_back("E9E25");
-//    rdf_input.emplace_back("E9E49");
+    rdf_input.emplace_back("E1E9");
+    rdf_input.emplace_back("E9E25");
+    rdf_input.emplace_back("E9E49");
     rdf_input.emplace_back("Edep");
     rdf_input.emplace_back("Emean");
     rdf_input.emplace_back("FD_2D_mean");
@@ -212,9 +212,9 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
         (Double_t COG_X_overall,
          Double_t COG_Y_overall,
          Double_t COG_Z_overall,
-//         Double_t E1E9,
-//         Double_t E9E25,
-//         Double_t E9E49,
+         Double_t E1E9,
+         Double_t E9E25,
+         Double_t E9E49,
          Double_t Edep,
          Double_t Emean,
          Double_t FD_2D_mean,
@@ -242,9 +242,9 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
         bdt_COG_X_overall      = COG_X_overall;
         bdt_COG_Y_overall      = COG_Y_overall;
         bdt_COG_Z_overall      = COG_Z_overall;
-//        bdt_E1E9               = E1E9;
-//        bdt_E9E25              = E9E25;
-//        bdt_E9E49              = E9E49;
+        bdt_E1E9               = E1E9;
+        bdt_E9E25              = E9E25;
+        bdt_E9E49              = E9E49;
         bdt_Edep               = Edep;
         bdt_Emean              = Emean;
         bdt_FD_2D_mean         = FD_2D_mean;

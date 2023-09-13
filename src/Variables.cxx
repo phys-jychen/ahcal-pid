@@ -65,7 +65,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     RDataFrame* dm = new RDataFrame(tree, file);
     string outname = file;
     outname = outname.substr(outname.find_last_of('/') + 1);
-    outname = "pid_" + outname;
+    outname = "rec_" + outname;
     auto fout = dm->Define("nhits", "(Int_t) Hit_X_nonzero.size()")
     // Transfer z position to the layer number
     .Define("layer", [] (vector<Double_t> Hit_Z_nonzero, Int_t nhits)
@@ -137,36 +137,43 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // The energy deposition of the fired cells
     .Define("Ecell", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
+        unordered_map<Int_t, Double_t> Ecell_map;
         vector<vector<Double_t>> Ecell = { {}, {} };
         for (Int_t i = 0; i < nhits; i++)
         {
             Int_t x = round((Hit_X_nonzero.at(i) + BiasX) / PeriodX);
             Int_t y = round((Hit_Y_nonzero.at(i) + BiasY) / PeriodY);
             Int_t index = 100000 * layer.at(i) + 100 * x + y;
-            Ecell.at(0).emplace_back(index);
-            Ecell.at(1).emplace_back(Hit_Energy_nonzero.at(i));
+            Ecell_map[index] += Hit_Energy_nonzero.at(i);
+        }
+        for (auto it = Ecell_map.cbegin(); it != Ecell_map.cend(); it++)
+        {
+            Ecell.at(0).emplace_back(it->first);
+            Ecell.at(1).emplace_back(it->second);
         }
         return Ecell;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
+    // The number of fired cells
+    .Define("ncells", "(Int_t) Ecell.at(0).size()")
     // The maximum energy deposition of the fired cells
-    .Define("Ecell_max", [] (vector<vector<Double_t>> Ecell)
+    .Define("Ecell_max", [] (vector<vector<Double_t>> Ecell, Int_t ncells)
     {
-        Double_t Ecell_max = *max_element(Ecell.at(1).begin(), Ecell.at(1).end());
+        vector<Double_t> Ecell_max = { (Double_t) ncells, 0.0 };
+        for (Int_t i = 0; i < ncells; i++)
+            if (Ecell.at(1).at(i) > Ecell_max.at(1))
+            {
+                Ecell_max.at(0) = Ecell.at(0).at(i);
+                Ecell_max.at(1) = Ecell.at(1).at(i);
+            }
         return Ecell_max;
-    }, {"Ecell"})
-    // The ID of the cell with maximum energy deposition
-    .Define("Ecell_max_id", [] (vector<vector<Double_t>> Ecell)
-    {
-        Int_t Ecell_max_id = max_element(Ecell.at(1).begin(), Ecell.at(1).end()) - Ecell.at(1).begin();
-        return (Int_t) Ecell.at(0).at(Ecell_max_id);
-    }, {"Ecell"})
+    }, {"Ecell", "ncells"})
     // The energy deposition in the 3*3 cells around the one with maximum energy deposition
-    .Define("Ecell_max_9", [] (vector<vector<Double_t>> Ecell, Int_t Ecell_max_id)
+    .Define("Ecell_max_9", [] (vector<vector<Double_t>> Ecell, vector<Double_t> Ecell_max)
     {
         Double_t Ecell_max_9 = 0.0;
-        Int_t z = Ecell_max_id / 100000;
-        Int_t x = (Ecell_max_id % 100000) / 100;
-        Int_t y = Ecell_max_id % 100;
+        Int_t z = (Int_t) Ecell_max.at(0) / 100000;
+        Int_t x = ((Int_t) Ecell_max.at(0) % 100000) / 100;
+        Int_t y = (Int_t) Ecell_max.at(0) % 100;
         for (Int_t ix = x - 1; ix <= x + 1; ix++)
         {
             if (ix < 0 || ix >= nCellX)
@@ -184,14 +191,14 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             }
         }
         return Ecell_max_9;
-    }, {"Ecell", "Ecell_max_id"})
+    }, {"Ecell", "Ecell_max"})
     // The energy deposition in the 5*5 cells around the one with maximum energy deposition
-    .Define("Ecell_max_25", [] (vector<vector<Double_t>> Ecell, Int_t Ecell_max_id)
+    .Define("Ecell_max_25", [] (vector<vector<Double_t>> Ecell, vector<Double_t> Ecell_max)
     {
         Double_t Ecell_max_25 = 0.0;
-        Int_t z = Ecell_max_id / 100000;
-        Int_t x = (Ecell_max_id % 100000) / 100;
-        Int_t y = Ecell_max_id % 100;
+        Int_t z = (Int_t) Ecell_max.at(0) / 100000;
+        Int_t x = ((Int_t) Ecell_max.at(0) % 100000) / 100;
+        Int_t y = (Int_t) Ecell_max.at(0) % 100;
         for (Int_t ix = x - 2; ix <= x + 2; ix++)
         {
             if (ix < 0 || ix >= nCellX)
@@ -209,14 +216,14 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             }
         }
         return Ecell_max_25;
-    }, {"Ecell", "Ecell_max_id"})
+    }, {"Ecell", "Ecell_max"})
     // The energy deposition in the 7*7 cells around the one with maximum energy deposition
-    .Define("Ecell_max_49", [] (vector<vector<Double_t>> Ecell, Int_t Ecell_max_id)
+    .Define("Ecell_max_49", [] (vector<vector<Double_t>> Ecell, vector<Double_t> Ecell_max)
     {
         Double_t Ecell_max_49 = 0.0;
-        Int_t z = Ecell_max_id / 100000;
-        Int_t x = (Ecell_max_id % 100000) / 100;
-        Int_t y = Ecell_max_id % 100;
+        Int_t z = (Int_t) Ecell_max.at(0) / 100000;
+        Int_t x = ((Int_t) Ecell_max.at(0) % 100000) / 100;
+        Int_t y = (Int_t) Ecell_max.at(0) % 100;
         for (Int_t ix = x - 3; ix <= x + 3; ix++)
         {
             if (ix < 0 || ix >= nCellX)
@@ -234,7 +241,13 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             }
         }
         return Ecell_max_49;
-    }, {"Ecell", "Ecell_max_id"})
+    }, {"Ecell", "Ecell_max"})
+    // Energy deposition of the central cell divided by the total energy deposition in the 3*3 cells around it
+    .Define("E1E9", "Ecell_max.at(1) / Ecell_max_9")
+    // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 5*5 cells around it
+    .Define("E9E25", "Ecell_max_9 / Ecell_max_25")
+    // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 7*7 cells around it
+    .Define("E9E49", "Ecell_max_9 / Ecell_max_49")
     // RMS value of the positions of all the hits on a layer
     .Define("layer_rms", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)->vector<Double_t>
     {
@@ -401,12 +414,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         shower_density /= nhits;
         return shower_density;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
-    // Energy deposition of the central cell divided by the total energy deposition in the 3*3 cells around it
-    .Define("E1E9", "Ecell_max / Ecell_max_9")
-    // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 5*5 cells around it
-    .Define("E9E25", "Ecell_max_9 / Ecell_max_25")
-    // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 7*7 cells around it
-    .Define("E9E49", "Ecell_max_9 / Ecell_max_49")
     // The distance between the layer with largest RMS value of position and the beginning layer
     .Define("shower_length", [] (vector<Double_t> layer_rms, Int_t shower_start)
     {
@@ -420,8 +427,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
                 max_layer = i;
         	    max_rms = layer_rms.at(i);
             }
-        //auto maxPosition = max_element(layer_rms.begin() + shower_start, layer_rms.end());
-        //Int_t max_layer = maxPosition - layer_rms.begin();
+//        auto maxPosition = max_element(layer_rms.begin() + shower_start, layer_rms.end());
+//        Int_t max_layer = maxPosition - layer_rms.begin();
         if (shower_start >= max_layer)
             shower_length = 0.0;
         else
