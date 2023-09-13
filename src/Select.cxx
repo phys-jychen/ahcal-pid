@@ -96,8 +96,8 @@ Int_t Select::ValidHits(const string& file, const string& tree)
     TFile* f = new TFile((TString) outname, "READ");
     TTree* t = f->Get<TTree>((TString) tree);
     t->SetBranchStatus("*", 1);
-//    vector<TString> deactivate = { "Hit_Energy", "Hit_Time", "Hit_X", "Hit_Y", "Hit_Z", "nhits" };
-    vector<TString> deactivate = { "Hit_Energy", "Hit_X", "Hit_Y", "Hit_Z", "nhits" };
+//    vector<TString> deactivate = { "CellID", "Hit_Energy", "Hit_Time", "Hit_X", "Hit_Y", "Hit_Z", "nhits" };
+    vector<TString> deactivate = { "CellID", "Hit_Energy", "Hit_X", "Hit_Y", "Hit_Z", "nhits" };
     for (TString de : deactivate)
         t->SetBranchStatus(de, 0);
     TFile* fnew = new TFile((TString) outname, "RECREATE");

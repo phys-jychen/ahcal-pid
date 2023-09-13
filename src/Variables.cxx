@@ -734,8 +734,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     TFile* f = new TFile((TString) outname, "READ");
     TTree* t = f->Get<TTree>((TString) tree);
     t->SetBranchStatus("*", 1);
-//    vector<TString> deactivate = { "CellID", "Hit_Energy_nonzero", "Hit_Phi_nonzero", "Hit_Theta_nonzero", "Hit_Time_nonzero", "Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero" };
-    vector<TString> deactivate = { "CellID", "Hit_Energy_nonzero", "Hit_Phi_nonzero", "Hit_Theta_nonzero", "Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero" };
+//    vector<TString> deactivate = { "Hit_Energy_nonzero", "Hit_Phi_nonzero", "Hit_Theta_nonzero", "Hit_Time_nonzero", "Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero" };
+    vector<TString> deactivate = { "Hit_Energy_nonzero", "Hit_Phi_nonzero", "Hit_Theta_nonzero", "Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero" };
     for (TString de : deactivate)
         t->SetBranchStatus(de, 0);
     TFile* fnew = new TFile((TString) outname, "RECREATE");
