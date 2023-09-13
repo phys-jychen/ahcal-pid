@@ -39,13 +39,13 @@ Int_t main(Int_t argc, char* argv[])
 
     if (file != "")
     {
-        cout << "-----> Reconstructing variables..." << endl;
-        cout << "-----> File: " << file << endl;
-        cout << "-----> Tree: " << tree << endl << endl;
+        cout << "---> Reconstructing variables..." << endl;
+        cout << "---> File: " << file << endl;
+        cout << "---> Tree: " << tree << endl << endl;
 
         v->GenNtuple(file, tree);
 
-        cout << "-----> Variable reconstruction finished!" << endl;
+        cout << "---> Variable reconstruction finished!" << endl;
     }
 
     else if (help == 0)

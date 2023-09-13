@@ -45,8 +45,8 @@ Int_t main(Int_t argc, char* argv[])
 
     if (train == 1)
     {
-        cout << "-----> Training and testing..." << endl;
-        cout << "-----> Tree: " << tree << endl;
+        cout << "----> Training and testing..." << endl;
+        cout << "----> Tree: " << tree << endl;
 
         b->AddVar("COG_X_overall",      'D');
         b->AddVar("COG_Y_overall",      'D');
@@ -90,18 +90,18 @@ Int_t main(Int_t argc, char* argv[])
 
         b->TrainBDT();
 
-        cout << "-----> Training and testing finished!" << endl;
+        cout << "----> Training and testing finished!" << endl;
 	}
 
     else if (bdt == 1 && file != "")
     {
-        cout << "-----> Classifying..." << endl;
-        cout << "-----> File: " << file << endl;
-        cout << "-----> Tree: " << tree << endl << endl;
+        cout << "----> Classifying..." << endl;
+        cout << "----> File: " << file << endl;
+        cout << "----> Tree: " << tree << endl << endl;
 
         b->BDTNtuple(file, tree);
 
-        cout << "-----> Classification finished!" << endl;
+        cout << "----> Classification finished!" << endl;
     }
 
     else if (help == 0)
