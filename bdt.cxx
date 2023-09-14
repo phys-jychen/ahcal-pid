@@ -57,8 +57,8 @@ Int_t main(Int_t argc, char* argv[])
         b->AddVar("Edep",               'D');
         b->AddVar("Emean",              'D');
         b->AddVar("FD_2D_mean",         'D');
-        b->AddVar("FD_3D_mean",         'D');
         b->AddVar("FD_2D_rms",          'D');
+        b->AddVar("FD_3D_mean",         'D');
         b->AddVar("FD_3D_rms",          'D');
         b->AddVar("hit_layer",          'D');
 //        b->AddVar("hit_time_mean",      'D');
