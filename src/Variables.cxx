@@ -133,7 +133,14 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return sum;
     }, {"Hit_Energy_nonzero"})
     // Average energy deposition of the hits
-    .Define("Emean", "Edep / nhits")
+//    .Define("Emean", "Edep / nhits")
+    .Define("Emean", [] (Double_t Edep, Int_t nhits)
+    {
+        if (nhits == 0)
+            return 0.0;
+        else
+            return Edep / nhits;
+    }, {"Edep", "nhits"})
     // The energy deposition of the fired cells
     .Define("Ecell", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
@@ -243,11 +250,32 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return Ecell_max_49;
     }, {"Ecell", "Ecell_max"})
     // Energy deposition of the central cell divided by the total energy deposition in the 3*3 cells around it
-    .Define("E1E9", "Ecell_max.at(1) / Ecell_max_9")
+//    .Define("E1E9", "Ecell_max.at(1) / Ecell_max_9")
+    .Define("E1E9", [] (vector<Double_t> Ecell_max, Double_t Ecell_max_9, Int_t nhits)
+    {
+        if (nhits == 0)
+            return 0.0;
+        else
+            return Ecell_max.at(1) / Ecell_max_9;
+    }, {"Ecell_max", "Ecell_max_9", "nhits"})
     // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 5*5 cells around it
-    .Define("E9E25", "Ecell_max_9 / Ecell_max_25")
+//    .Define("E9E25", "Ecell_max_9 / Ecell_max_25")
+    .Define("E9E25", [] (Double_t Ecell_max_9, Double_t Ecell_max_25, Int_t nhits)
+    {
+        if (nhits == 0)
+            return 0.0;
+        else
+            return Ecell_max_9 / Ecell_max_25;
+    }, {"Ecell_max_9", "Ecell_max_25", "nhits"})
     // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 7*7 cells around it
-    .Define("E9E49", "Ecell_max_9 / Ecell_max_49")
+//    .Define("E9E49", "Ecell_max_9 / Ecell_max_49")
+    .Define("E9E49", [] (Double_t Ecell_max_9, Double_t Ecell_max_49, Int_t nhits)
+    {
+        if (nhits == 0)
+            return 0.0;
+        else
+            return Ecell_max_9 / Ecell_max_49;
+    }, {"Ecell_max_9", "Ecell_max_49", "nhits"})
     // RMS value of the positions of all the hits on a layer
     .Define("layer_rms", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)->vector<Double_t>
     {
@@ -377,11 +405,20 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return hit_layer;
     }, {"layer"})
     // The proportion of layers with xwidth, ywidth >= 60 mm within the layers with at least one hit
-    .Define("shower_layer_ratio", "shower_layer / hit_layer")
+//    .Define("shower_layer_ratio", "shower_layer / hit_layer")
+    .Define("shower_layer_ratio", [] (Double_t shower_layer, Double_t hit_layer, Int_t nhits)
+    {
+        if (nhits == 0)
+            return 0.0;
+        else
+            return shower_layer / hit_layer;
+    }, {"shower_layer", "hit_layer", "nhits"})
     // Average number of hits in the 3*3 cells around a given one
     .Define("shower_density", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
         Double_t shower_density = 0.0;
+        if (nhits == 0)
+            return shower_density;
         unordered_map<Int_t, Int_t> map_CellID;
         for (Int_t j = 0; j < nhits; j++)
         {
