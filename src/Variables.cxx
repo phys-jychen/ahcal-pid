@@ -684,7 +684,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         delete hough;
         return ntrack;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "Digi_Hit_Energy_nonzero"})
-    /*
     // The average time of all the hits
     .Define("hit_time_mean", [] (vector<Double_t> hit_time, Int_t nhits)
     {
@@ -733,7 +732,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         else
             return Sqrt(tot2 / nhits);
     }, {"Hit_Time_nonzero", "layer", "shower_start", "shower_end", "nhits"})
-    */
 //    .Range(1)
     .Snapshot(tree, outname);
     delete dm;
