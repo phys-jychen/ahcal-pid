@@ -24,7 +24,7 @@ Int_t main(Int_t argc, char* argv[])
             cout << "    With other specified tree:     iBDT -r -t [tree]" << endl;
             cout << "Classification:" << endl;
             cout << "    With default tree \"Calib_Hit\": iBDT -v f [file]" << endl;
-            cout << "    With other specified tree:     iBDT -f [file] -t [tree]" << endl << endl;
+            cout << "    With other specified tree:     iBDT -v -f [file] -t [tree]" << endl << endl;
             break;
         }
 
@@ -79,14 +79,14 @@ Int_t main(Int_t argc, char* argv[])
         b->AddVar("zwidth",             'D');
 
         // Signal
-        b->AddTrainSig("/lustre/collider/chenjiyuan/ahcal-pid/build/test/rec_sel_train_pion.root", tree);
-        b->AddTestSig ("/lustre/collider/chenjiyuan/ahcal-pid/build/test/rec_sel_test_pion.root",  tree);
+        b->AddTrainSig("/lustre/collider/chenjiyuan/ahcal-pid/run/geometry/output/rec_sel_train_pion.root", tree);
+        b->AddTestSig ("/lustre/collider/chenjiyuan/ahcal-pid/run/geometry/output/rec_sel_test_pion.root",  tree);
 
         // Background
-        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/build/test/rec_sel_train_muon.root", tree);
-        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/build/test/rec_sel_train_e.root",    tree);
-        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/build/test/rec_sel_test_muon.root",  tree);
-        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/build/test/rec_sel_test_e.root",     tree);
+        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/run/geometry/output/rec_sel_train_muon.root", tree);
+        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/run/geometry/output/rec_sel_train_e.root",    tree);
+        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/run/geometry/output/rec_sel_test_muon.root",  tree);
+        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/run/geometry/output/rec_sel_test_e.root",     tree);
 
         b->TrainBDT();
 
