@@ -19,7 +19,7 @@ const Int_t nLayer = 40;
 const Double_t BiasX = 0.5 * (nCellX - 1) * PeriodX;
 const Double_t BiasY = 0.5 * (nCellY - 1) * PeriodY;
 
-Int_t NHScaleV2(RVec<Double_t> const& pos_x, RVec<Double_t> const& pos_y, RVec<Double_t> const& pos_z, Int_t const& RatioX, Int_t const& RatioY, Int_t const& RatioZ)
+Int_t NHScaleV2(RVec<Double_t> pos_x, RVec<Double_t> pos_y, RVec<Double_t> pos_z, Int_t RatioX, Int_t RatioY, Int_t RatioZ)
 {
     Int_t ReScaledNH = 0;
     Int_t tmpI = 0;
@@ -37,8 +37,8 @@ Int_t NHScaleV2(RVec<Double_t> const& pos_x, RVec<Double_t> const& pos_y, RVec<D
         Double_t y = pos_y.at(i);
         Double_t z = pos_z.at(i);
 
-        tmpI = (Int_t ((x + BiasX) / PeriodX) + Int_t(Abs(x) / x)) / RatioX;
-        tmpJ = (Int_t ((y + BiasY) / PeriodY) + Int_t(Abs(y) / y)) / RatioY;
+        tmpI = ((Int_t) ((x + BiasX) / PeriodX) + (Int_t) (Abs(x) / x)) / RatioX;
+        tmpJ = ((Int_t) ((y + BiasY) / PeriodY) + (Int_t) (Abs(y) / y)) / RatioY;
         tmpK = (Int_t) (z / Thick) / RatioZ;
         tmpEn = 1;
 
@@ -115,14 +115,14 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return ywidth;
     }, {"Hit_Y_nonzero"})
     // RMS depth
-    .Define("zwidth", [] (vector<Double_t> Hit_Z_nonzero)
+    .Define("zdepth", [] (vector<Double_t> Hit_Z_nonzero)
     {
         TH1D* h1 = new TH1D("h1", "", 100, 0, 1200);
         for (Double_t i : Hit_Z_nonzero)
             h1->Fill(i);
-        Double_t zwidth = h1->GetRMS();
+        Double_t zdepth = h1->GetRMS();
         delete h1;
-        return zwidth;
+        return zdepth;
     }, {"Hit_Z_nonzero"})
     // Total energy deposition
     .Define("Edep", [] (vector<Double_t> Hit_Energy_nonzero)
@@ -162,25 +162,26 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
     // The number of fired cells
     .Define("ncells", "(Int_t) Ecell.at(0).size()")
-    // The maximum energy deposition of the fired cells
-    .Define("Ecell_max", [] (vector<vector<Double_t>> Ecell, Int_t ncells)
+    // The maximum energy deposition as well as the ID of the fired cells
+    .Define("Ecell_max_id", [] (vector<vector<Double_t>> Ecell, Int_t ncells)
     {
-        vector<Double_t> Ecell_max = { (Double_t) ncells, 0.0 };
+        vector<Double_t> Ecell_max_id = { (Double_t) ncells, 0.0 };
         for (Int_t i = 0; i < ncells; i++)
-            if (Ecell.at(1).at(i) > Ecell_max.at(1))
+            if (Ecell.at(1).at(i) > Ecell_max_id.at(1))
             {
-                Ecell_max.at(0) = Ecell.at(0).at(i);
-                Ecell_max.at(1) = Ecell.at(1).at(i);
+                Ecell_max_id.at(0) = Ecell.at(0).at(i);
+                Ecell_max_id.at(1) = Ecell.at(1).at(i);
             }
-        return Ecell_max;
+        return Ecell_max_id;
     }, {"Ecell", "ncells"})
+    .Define("Ecell_max", "Ecell_max_id[1]")
     // The energy deposition in the 3*3 cells around the one with maximum energy deposition
-    .Define("Ecell_max_9", [] (vector<vector<Double_t>> Ecell, vector<Double_t> Ecell_max)
+    .Define("Ecell_max_9", [] (vector<vector<Double_t>> Ecell, vector<Double_t> Ecell_max_id)
     {
         Double_t Ecell_max_9 = 0.0;
-        Int_t z = (Int_t) Ecell_max.at(0) / 100000;
-        Int_t x = ((Int_t) Ecell_max.at(0) % 100000) / 100;
-        Int_t y = (Int_t) Ecell_max.at(0) % 100;
+        Int_t z = (Int_t) Ecell_max_id.at(0) / 100000;
+        Int_t x = ((Int_t) Ecell_max_id.at(0) % 100000) / 100;
+        Int_t y = (Int_t) Ecell_max_id.at(0) % 100;
         for (Int_t ix = x - 1; ix <= x + 1; ix++)
         {
             if (ix < 0 || ix >= nCellX)
@@ -198,14 +199,14 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             }
         }
         return Ecell_max_9;
-    }, {"Ecell", "Ecell_max"})
+    }, {"Ecell", "Ecell_max_id"})
     // The energy deposition in the 5*5 cells around the one with maximum energy deposition
-    .Define("Ecell_max_25", [] (vector<vector<Double_t>> Ecell, vector<Double_t> Ecell_max)
+    .Define("Ecell_max_25", [] (vector<vector<Double_t>> Ecell, vector<Double_t> Ecell_max_id)
     {
         Double_t Ecell_max_25 = 0.0;
-        Int_t z = (Int_t) Ecell_max.at(0) / 100000;
-        Int_t x = ((Int_t) Ecell_max.at(0) % 100000) / 100;
-        Int_t y = (Int_t) Ecell_max.at(0) % 100;
+        Int_t z = (Int_t) Ecell_max_id.at(0) / 100000;
+        Int_t x = ((Int_t) Ecell_max_id.at(0) % 100000) / 100;
+        Int_t y = (Int_t) Ecell_max_id.at(0) % 100;
         for (Int_t ix = x - 2; ix <= x + 2; ix++)
         {
             if (ix < 0 || ix >= nCellX)
@@ -223,14 +224,14 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             }
         }
         return Ecell_max_25;
-    }, {"Ecell", "Ecell_max"})
+    }, {"Ecell", "Ecell_max_id"})
     // The energy deposition in the 7*7 cells around the one with maximum energy deposition
-    .Define("Ecell_max_49", [] (vector<vector<Double_t>> Ecell, vector<Double_t> Ecell_max)
+    .Define("Ecell_max_49", [] (vector<vector<Double_t>> Ecell, vector<Double_t> Ecell_max_id)
     {
         Double_t Ecell_max_49 = 0.0;
-        Int_t z = (Int_t) Ecell_max.at(0) / 100000;
-        Int_t x = ((Int_t) Ecell_max.at(0) % 100000) / 100;
-        Int_t y = (Int_t) Ecell_max.at(0) % 100;
+        Int_t z = (Int_t) Ecell_max_id.at(0) / 100000;
+        Int_t x = ((Int_t) Ecell_max_id.at(0) % 100000) / 100;
+        Int_t y = (Int_t) Ecell_max_id.at(0) % 100;
         for (Int_t ix = x - 3; ix <= x + 3; ix++)
         {
             if (ix < 0 || ix >= nCellX)
@@ -248,15 +249,15 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             }
         }
         return Ecell_max_49;
-    }, {"Ecell", "Ecell_max"})
+    }, {"Ecell", "Ecell_max_id"})
     // Energy deposition of the central cell divided by the total energy deposition in the 3*3 cells around it
-//    .Define("E1E9", "Ecell_max.at(1) / Ecell_max_9")
-    .Define("E1E9", [] (vector<Double_t> Ecell_max, Double_t Ecell_max_9, Int_t nhits)
+//    .Define("E1E9", "Ecell_max_id.at(1) / Ecell_max_9")
+    .Define("E1E9", [] (Double_t Ecell_max, Double_t Ecell_max_9, Int_t nhits)
     {
         if (nhits == 0)
             return 0.0;
         else
-            return Ecell_max.at(1) / Ecell_max_9;
+            return Ecell_max / Ecell_max_9;
     }, {"Ecell_max", "Ecell_max_9", "nhits"})
     // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 5*5 cells around it
 //    .Define("E9E25", "Ecell_max_9 / Ecell_max_25")
@@ -481,16 +482,41 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         vector<Int_t> NResizeHit(num);
         for (Int_t i = 0; i < num; i++)
         {
-            if (nhits == 0)
+            NResizeHit.at(i) = NHScaleV2(pos_x, pos_y, pos_z, scale.at(i), scale.at(i), 1);
+            if (nhits == 0 || NResizeHit.at(i) <= 0)
             {
-                fd_2d.at(i) = -1;
+                fd_2d.at(i) = -1.0;
                 continue;
             }
-            NResizeHit.at(i) = NHScaleV2(pos_x, pos_y, pos_z, scale.at(i), scale.at(i), 1);
             fd_2d.at(i) = Log((Double_t) nhits / NResizeHit.at(i)) / Log((Double_t) scale.at(i));
         }
         return fd_2d;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "nhits"})
+    .Define("FD_2D_2",   "FD_2D[0]")
+    .Define("FD_2D_3",   "FD_2D[1]")
+    .Define("FD_2D_4",   "FD_2D[2]")
+    .Define("FD_2D_5",   "FD_2D[3]")
+    .Define("FD_2D_6",   "FD_2D[4]")
+    .Define("FD_2D_7",   "FD_2D[5]")
+    .Define("FD_2D_8",   "FD_2D[6]")
+    .Define("FD_2D_9",   "FD_2D[7]")
+    .Define("FD_2D_10",  "FD_2D[8]")
+    .Define("FD_2D_12",  "FD_2D[9]")
+    .Define("FD_2D_15",  "FD_2D[10]")
+    .Define("FD_2D_20",  "FD_2D[11]")
+    .Define("FD_2D_30",  "FD_2D[12]")
+    .Define("FD_2D_40",  "FD_2D[13]")
+    .Define("FD_2D_50",  "FD_2D[14]")
+    .Define("FD_2D_60",  "FD_2D[15]")
+    .Define("FD_2D_70",  "FD_2D[16]")
+    .Define("FD_2D_80",  "FD_2D[17]")
+    .Define("FD_2D_90",  "FD_2D[18]")
+    .Define("FD_2D_100", "FD_2D[19]")
+    .Define("FD_2D_110", "FD_2D[20]")
+    .Define("FD_2D_120", "FD_2D[21]")
+    .Define("FD_2D_130", "FD_2D[22]")
+    .Define("FD_2D_140", "FD_2D[23]")
+    .Define("FD_2D_150", "FD_2D[24]")
     // 3-dimensional fractal dimension
     .Define("FD_3D", [] (RVec<Double_t> const& pos_x, RVec<Double_t> const& pos_y, RVec<Double_t> const& pos_z, Int_t nhits)
     {
@@ -500,16 +526,41 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         vector<Int_t> NResizeHit(num);
         for (Int_t i = 0; i < num; i++)
         {
-            if (nhits == 0)
+            NResizeHit.at(i) = NHScaleV2(pos_x, pos_y, pos_z, scale.at(i), scale.at(i), scale.at(i));
+            if (nhits == 0 || NResizeHit.at(i) <= 0)
             {
-                fd_3d.at(i) = -1;
+                fd_3d.at(i) = -1.0;
                 continue;
             }
-            NResizeHit.at(i) = NHScaleV2(pos_x, pos_y, pos_z, scale.at(i), scale.at(i), scale.at(i));
             fd_3d.at(i) = Log((Double_t) nhits / NResizeHit.at(i)) / Log((Double_t) scale.at(i));
         }
         return fd_3d;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "nhits"})
+    .Define("FD_3D_2",   "FD_3D[0]")
+    .Define("FD_3D_3",   "FD_3D[1]")
+    .Define("FD_3D_4",   "FD_3D[2]")
+    .Define("FD_3D_5",   "FD_3D[3]")
+    .Define("FD_3D_6",   "FD_3D[4]")
+    .Define("FD_3D_7",   "FD_3D[5]")
+    .Define("FD_3D_8",   "FD_3D[6]")
+    .Define("FD_3D_9",   "FD_3D[7]")
+    .Define("FD_3D_10",  "FD_3D[8]")
+    .Define("FD_3D_12",  "FD_3D[9]")
+    .Define("FD_3D_15",  "FD_3D[10]")
+    .Define("FD_3D_20",  "FD_3D[11]")
+    .Define("FD_3D_30",  "FD_3D[12]")
+    .Define("FD_3D_40",  "FD_3D[13]")
+    .Define("FD_3D_50",  "FD_3D[14]")
+    .Define("FD_3D_60",  "FD_3D[15]")
+    .Define("FD_3D_70",  "FD_3D[16]")
+    .Define("FD_3D_80",  "FD_3D[17]")
+    .Define("FD_3D_90",  "FD_3D[18]")
+    .Define("FD_3D_100", "FD_3D[19]")
+    .Define("FD_3D_110", "FD_3D[20]")
+    .Define("FD_3D_120", "FD_3D[21]")
+    .Define("FD_3D_130", "FD_3D[22]")
+    .Define("FD_3D_140", "FD_3D[23]")
+    .Define("FD_3D_150", "FD_3D[24]")
     // Average value of all the 2-dimensional fractal dimensions
     .Define("FD_2D_mean", [] (vector<Double_t> FD_2D)
     {
@@ -550,6 +601,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         Double_t FD_3D_rms = Sqrt(total2 / num);
         return FD_3D_rms;
     }, {"FD_3D"})
+    /*
     // Centre of gravity of each layer, in x direction
     .Define("COG_X", [] (vector<Double_t> Hit_X_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
     {
@@ -580,6 +632,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         }
         return cog_y;
     }, {"Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
+    */
     // Centre of gravity of every 5 layers, in x direction
     .Define("COG_X_5", [] (vector<Double_t> Hit_X_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
     {
@@ -592,12 +645,20 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         for (Int_t k = 0; k < nLayer / 5; k++)
         {
             if (cog_x_5.at(k) == 0)
-                continue;
+                cog_x_5.at(k) = 400.0;
             else
                 cog_x_5.at(k) /= energy_5layer.at(k);
         }
         return cog_x_5;
     }, {"Hit_X_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
+    .Define("COG_X_5_0", "COG_X_5[0]")
+    .Define("COG_X_5_1", "COG_X_5[1]")
+    .Define("COG_X_5_2", "COG_X_5[2]")
+    .Define("COG_X_5_3", "COG_X_5[3]")
+    .Define("COG_X_5_4", "COG_X_5[4]")
+    .Define("COG_X_5_5", "COG_X_5[5]")
+    .Define("COG_X_5_6", "COG_X_5[6]")
+    .Define("COG_X_5_7", "COG_X_5[7]")
     // Centre of gravity of every 5 layers, in y direction
     .Define("COG_Y_5", [] (vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
     {
@@ -610,12 +671,20 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         for (Int_t k = 0; k < nLayer / 5; k++)
         {
             if (cog_y_5.at(k) == 0)
-                continue;
+                cog_y_5.at(k) = 400.0;
             else
                 cog_y_5.at(k) /= energy_5layer.at(k);
         }
         return cog_y_5;
     }, {"Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
+    .Define("COG_Y_5_0", "COG_Y_5[0]")
+    .Define("COG_Y_5_1", "COG_Y_5[1]")
+    .Define("COG_Y_5_2", "COG_Y_5[2]")
+    .Define("COG_Y_5_3", "COG_Y_5[3]")
+    .Define("COG_Y_5_4", "COG_Y_5[4]")
+    .Define("COG_Y_5_5", "COG_Y_5[5]")
+    .Define("COG_Y_5_6", "COG_Y_5[6]")
+    .Define("COG_Y_5_7", "COG_Y_5[7]")
     // Centre of gravity of every 5 layers, in z direction
     .Define("COG_Z_5", [] (vector<Double_t> Hit_Z_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
     {
@@ -628,18 +697,26 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         for (Int_t k = 0; k < nLayer / 5; k++)
         {
             if (cog_z_5.at(k) == 0)
-                continue;
+                cog_z_5.at(k) = 1500.0;
             else
                 cog_z_5.at(k) /= energy_5layer.at(k);
         }
         return cog_z_5;
     }, {"Hit_Z_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
+    .Define("COG_Z_5_0", "COG_Z_5[0]")
+    .Define("COG_Z_5_1", "COG_Z_5[1]")
+    .Define("COG_Z_5_2", "COG_Z_5[2]")
+    .Define("COG_Z_5_3", "COG_Z_5[3]")
+    .Define("COG_Z_5_4", "COG_Z_5[4]")
+    .Define("COG_Z_5_5", "COG_Z_5[5]")
+    .Define("COG_Z_5_6", "COG_Z_5[6]")
+    .Define("COG_Z_5_7", "COG_Z_5[7]")
     // The overall centre of gravity, in x direction
     .Define("COG_X_overall", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
     {
         Double_t cog_x_overall = 0;
         if (Edep == 0)
-            return cog_x_overall;
+            return 400.0;
         else
         {
             for (Int_t i = 0; i < nhits; i++)
@@ -653,7 +730,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     {
         Double_t cog_y_overall = 0;
         if (Edep == 0)
-            return cog_y_overall;
+            return 400.0;
         else
         {
             for (Int_t i = 0; i < nhits; i++)
@@ -667,7 +744,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     {
         Double_t cog_z_overall = 0;
         if (Edep == 0)
-            return cog_z_overall;
+            return 1500.0;
         else
         {
             for (Int_t i = 0; i < nhits; i++)
@@ -676,6 +753,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             return cog_z_overall;
         }
     }, {"Hit_Z_nonzero", "Hit_Energy_nonzero", "Edep", "nhits"})
+    /*
     //
     .Define("hclx", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero)
     {
@@ -712,6 +790,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         delete hough;
         return hcle;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "Hit_Energy_nonzero"})
+    */
     // The number of tracks of an event, with Hough transformation applied
     .Define("ntrack", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero)
     {
@@ -722,6 +801,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return ntrack;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "Hit_Energy_nonzero"})
     /*
+    // Currently, time information is not available
     // The average time of all the hits
     .Define("hit_time_mean", [] (vector<Double_t> hit_time, Int_t nhits)
     {
@@ -778,8 +858,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     TFile* f = new TFile((TString) outname, "READ");
     TTree* t = f->Get<TTree>((TString) tree);
     t->SetBranchStatus("*", 1);
-//    vector<TString> deactivate = { "Ecell", "Hit_Energy_nonzero", "Hit_Phi_nonzero", "Hit_Theta_nonzero", "Hit_Time_nonzero", "Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero" };
-    vector<TString> deactivate = { "Ecell", "Hit_Energy_nonzero", "Hit_Phi_nonzero", "Hit_Theta_nonzero", "Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero" };
+//    vector<TString> deactivate = { "COG_X_5", "COG_Y_5", "COG_Z_5", "Ecell", "Ecell_max_id", "FD_2D", "FD_3D", "Hit_Energy_nonzero", "Hit_Phi_nonzero", "Hit_Theta_nonzero", "Hit_Time_nonzero", "Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "hits_on_layer", "layer", "layer_energy", "layer_rms", "layer_xwidth", "layer_ywidth" };
+    vector<TString> deactivate = { "COG_X_5", "COG_Y_5", "COG_Z_5", "Ecell", "Ecell_max_id", "FD_2D", "FD_3D", "Hit_Energy_nonzero", "Hit_Phi_nonzero", "Hit_Theta_nonzero", "Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "hits_on_layer", "layer", "layer_energy", "layer_rms", "layer_xwidth", "layer_ywidth" };
     for (TString de : deactivate)
         t->SetBranchStatus(de, 0);
     TFile* fnew = new TFile((TString) outname, "RECREATE");

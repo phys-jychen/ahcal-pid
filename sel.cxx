@@ -1,7 +1,7 @@
 #include "Select.h"
 using namespace std;
 
-Int_t main(Int_t argc, char* argv[])
+Int_t main(Int_t argc, Char_t* argv[])
 {
     string file = "", tree = "Calib_Hit";
     Int_t help = 0;
@@ -13,7 +13,7 @@ Int_t main(Int_t argc, char* argv[])
             help = 1;
             cout << endl;
             cout << "Help information" << endl << endl;
-            cout << "Discard hits with E = 0:" << endl;
+            cout << "Discard hits with E <= 0:" << endl;
             cout << "    With default tree \"Calib_Hit\": iSel -f [file]" << endl;
             cout << "    With other specified tree:     iSel -f [file] -t [tree]" << endl;
             cout << "Reconstruct variables:" << endl;
@@ -23,7 +23,7 @@ Int_t main(Int_t argc, char* argv[])
             cout << "    With default tree \"Calib_Hit\": iBDT -r" << endl;
             cout << "    With other specified tree:     iBDT -r -t [tree]" << endl;
             cout << "Classification:" << endl;
-            cout << "    With default tree \"Calib_Hit\": iBDT -v f [file]" << endl;
+            cout << "    With default tree \"Calib_Hit\": iBDT -v -f [file]" << endl;
             cout << "    With other specified tree:     iBDT -v -f [file] -t [tree]" << endl << endl;
             break;
         }

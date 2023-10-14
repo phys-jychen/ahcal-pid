@@ -18,7 +18,7 @@ iBDT -h[elp]
 to display help information.  For more detail, please refer to the following instructions. :p
 
 ### Selecting Hits
-In MC samples or even real data, a large number of hits do not deposit energy in the scintillator.  These hits are not useful in our analysis and should be discarded.  To achieve this, run
+In MC samples or even real data, some of the hits do not deposit energy in the scintillator, or the energy deposition is a negative number.  In these cases, the hits are misleading and not useful in our analysis; therefore, they should be discarded.  To achieve this, run
 ```shell
 iSel -f [file]
 ```
