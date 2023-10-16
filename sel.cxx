@@ -23,7 +23,7 @@ Int_t main(Int_t argc, char* argv[])
             cout << "    With default tree \"Calib_Hit\": iBDT -r" << endl;
             cout << "    With other specified tree:     iBDT -r -t [tree]" << endl;
             cout << "Classification:" << endl;
-            cout << "    With default tree \"Calib_Hit\": iBDT -v f [file]" << endl;
+            cout << "    With default tree \"Calib_Hit\": iBDT -v -f [file]" << endl;
             cout << "    With other specified tree:     iBDT -v -f [file] -t [tree]" << endl << endl;
             break;
         }
