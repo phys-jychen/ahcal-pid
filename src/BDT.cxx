@@ -209,8 +209,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     Float_t  bdt_FD_3D_rms;
 
     Float_t  bdt_hit_layer;
-    Float_t  bdt_hit_time_mean;
-    Float_t  bdt_hit_time_rms;
+//    Float_t  bdt_hit_time_mean;
+//    Float_t  bdt_hit_time_rms;
     Float_t  bdt_nhits;
     Float_t  bdt_ntrack;
     Float_t  bdt_shower_density;
@@ -220,8 +220,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     Float_t  bdt_shower_length;
     Float_t  bdt_shower_radius;
     Float_t  bdt_shower_start;
-    Float_t  bdt_shower_time_mean;
-    Float_t  bdt_shower_time_rms;
+//    Float_t  bdt_shower_time_mean;
+//    Float_t  bdt_shower_time_rms;
     Float_t  bdt_xwidth;
     Float_t  bdt_ywidth;
     Float_t  bdt_zdepth;
@@ -323,8 +323,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     reader->AddVariable("FD_3D_rms",          &bdt_FD_3D_rms);
 
     reader->AddVariable("hit_layer",          &bdt_hit_layer);
-    reader->AddVariable("hit_time_mean",      &bdt_hit_time_mean);
-    reader->AddVariable("hit_time_rms",       &bdt_hit_time_rms);
+//    reader->AddVariable("hit_time_mean",      &bdt_hit_time_mean);
+//    reader->AddVariable("hit_time_rms",       &bdt_hit_time_rms);
     reader->AddVariable("nhits",              &bdt_nhits);
     reader->AddVariable("ntrack",             &bdt_ntrack);
     reader->AddVariable("shower_density",     &bdt_shower_density);
@@ -334,8 +334,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     reader->AddVariable("shower_length",      &bdt_shower_length);
     reader->AddVariable("shower_radius",      &bdt_shower_radius);
     reader->AddVariable("shower_start",       &bdt_shower_start);
-    reader->AddVariable("shower_time_mean",   &bdt_shower_time_mean);
-    reader->AddVariable("shower_time_rms",    &bdt_shower_time_rms);
+//    reader->AddVariable("shower_time_mean",   &bdt_shower_time_mean);
+//    reader->AddVariable("shower_time_rms",    &bdt_shower_time_rms);
     reader->AddVariable("xwidth",             &bdt_xwidth);
     reader->AddVariable("ywidth",             &bdt_ywidth);
     reader->AddVariable("zdepth",             &bdt_zdepth);
@@ -442,8 +442,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     rdf_input.emplace_back("FD_3D_rms");
 
     rdf_input.emplace_back("hit_layer");
-    rdf_input.emplace_back("hit_time_mean");
-    rdf_input.emplace_back("hit_time_rms");
+//    rdf_input.emplace_back("hit_time_mean");
+//    rdf_input.emplace_back("hit_time_rms");
     rdf_input.emplace_back("nhits");
     rdf_input.emplace_back("ntrack");
     rdf_input.emplace_back("shower_density");
@@ -453,8 +453,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     rdf_input.emplace_back("shower_length");
     rdf_input.emplace_back("shower_radius");
     rdf_input.emplace_back("shower_start");
-    rdf_input.emplace_back("shower_time_mean");
-    rdf_input.emplace_back("shower_time_rms");
+//    rdf_input.emplace_back("shower_time_mean");
+//    rdf_input.emplace_back("shower_time_rms");
     rdf_input.emplace_back("xwidth");
     rdf_input.emplace_back("ywidth");
     rdf_input.emplace_back("zdepth");
@@ -553,8 +553,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
          Double_t FD_3D_mean,
          Double_t FD_3D_rms,
          Double_t hit_layer,
-         Double_t hit_time_mean,
-         Double_t hit_time_rms,
+//         Double_t hit_time_mean,
+//         Double_t hit_time_rms,
          Int_t    nhits,
          Int_t    ntrack,
          Double_t shower_density,
@@ -564,8 +564,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
          Double_t shower_length,
          Double_t shower_radius,
          Int_t    shower_start,
-         Double_t shower_time_mean,
-         Double_t shower_time_rms,
+//         Double_t shower_time_mean,
+//         Double_t shower_time_rms,
          Double_t xwidth,
          Double_t ywidth,
          Double_t zdepth)
@@ -667,8 +667,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
         bdt_FD_3D_rms          = FD_3D_rms;
 
         bdt_hit_layer          = hit_layer;
-        bdt_hit_time_mean      = hit_time_mean;
-        bdt_hit_time_rms       = hit_time_rms;
+//        bdt_hit_time_mean      = hit_time_mean;
+//        bdt_hit_time_rms       = hit_time_rms;
         bdt_nhits              = nhits;
         bdt_ntrack             = ntrack;
         bdt_shower_density     = shower_density;
@@ -678,8 +678,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
         bdt_shower_length      = shower_length;
         bdt_shower_radius      = shower_radius;
         bdt_shower_start       = shower_start;
-        bdt_shower_time_mean   = shower_time_mean;
-        bdt_shower_time_rms    = shower_time_rms;
+//        bdt_shower_time_mean   = shower_time_mean;
+//        bdt_shower_time_rms    = shower_time_rms;
         bdt_xwidth             = xwidth;
         bdt_ywidth             = ywidth;
         bdt_zdepth             = zdepth;

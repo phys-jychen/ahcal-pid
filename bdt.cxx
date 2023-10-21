@@ -150,8 +150,8 @@ Int_t main(Int_t argc, char* argv[])
         b->AddVar("FD_3D_rms",          'D');
 
         b->AddVar("hit_layer",          'D');
-        b->AddVar("hit_time_mean",      'D');
-        b->AddVar("hit_time_rms",       'D');
+//        b->AddVar("hit_time_mean",      'D');
+//        b->AddVar("hit_time_rms",       'D');
         b->AddVar("nhits",              'I');
         b->AddVar("ntrack",             'D');
         b->AddVar("shower_density",     'D');
@@ -161,8 +161,8 @@ Int_t main(Int_t argc, char* argv[])
         b->AddVar("shower_length",      'D');
         b->AddVar("shower_radius",      'D');
         b->AddVar("shower_start",       'I');
-        b->AddVar("shower_time_mean",   'D');
-        b->AddVar("shower_time_rms",    'D');
+//        b->AddVar("shower_time_mean",   'D');
+//        b->AddVar("shower_time_rms",    'D');
         b->AddVar("xwidth",             'D');
         b->AddVar("ywidth",             'D');
         b->AddVar("zdepth",             'D');
@@ -172,10 +172,10 @@ Int_t main(Int_t argc, char* argv[])
         b->AddTestSig ("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_test_pion.root",  tree);
 
         // Background
-        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_train_muon.root", tree);
-//        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_train_e.root",    tree);
-        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_test_muon.root",  tree);
-//        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_test_e.root",     tree);
+//        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_train_muon.root", tree);
+        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_train_e.root",    tree);
+//        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_test_muon.root",  tree);
+        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_test_e.root",     tree);
 
         b->TrainBDT();
 
