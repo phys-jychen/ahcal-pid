@@ -1,5 +1,4 @@
 #include "BDT.h"
-using namespace std;
 
 Int_t main(Int_t argc, char* argv[])
 {
@@ -168,14 +167,14 @@ Int_t main(Int_t argc, char* argv[])
         b->AddVar("zdepth",             'D');
 
         // Signal
-        b->AddTrainSig("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_train_pion.root", tree);
-        b->AddTestSig ("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_test_pion.root",  tree);
+        b->AddTrainSig("/lustre/collider/chenjiyuan/ahcal-pid/build/geometry/train_pion.root", tree);
+        b->AddTestSig ("/lustre/collider/chenjiyuan/ahcal-pid/build/geometry/test_pion.root",  tree);
 
         // Background
-//        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_train_muon.root", tree);
-        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_train_e.root",    tree);
-//        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_test_muon.root",  tree);
-        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_test_e.root",     tree);
+//        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/build/geometry/train_muon.root", tree);
+        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/build/geometry/train_e.root",    tree);
+//        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/build/geometry/test_muon.root",  tree);
+        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/build/geometry/test_e.root",     tree);
 
         b->TrainBDT();
 

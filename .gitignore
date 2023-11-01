@@ -2,5 +2,7 @@
 bin/
 build/
 run/
+cmake-build-debug/
 
 # Files:
+.clion.source.upload.marker

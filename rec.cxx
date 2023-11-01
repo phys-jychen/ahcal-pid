@@ -1,5 +1,4 @@
 #include "Variables.h"
-using namespace std;
 
 Int_t main(Int_t argc, char* argv[])
 {
