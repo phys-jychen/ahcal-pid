@@ -56,7 +56,7 @@ Int_t main(Int_t argc, char* argv[])
         b->AddVar("COG_X_5_5",          'D');
         b->AddVar("COG_X_5_6",          'D');
         b->AddVar("COG_X_5_7",          'D');
-        b->AddVar("COG_X_overall",      'D');
+        b->AddVar("COG_X_mean",         'D');
 
         // COG_Y
         b->AddVar("COG_Y_5_0",          'D');
@@ -67,7 +67,7 @@ Int_t main(Int_t argc, char* argv[])
         b->AddVar("COG_Y_5_5",          'D');
         b->AddVar("COG_Y_5_6",          'D');
         b->AddVar("COG_Y_5_7",          'D');
-        b->AddVar("COG_Y_overall",      'D');
+        b->AddVar("COG_Y_mean",         'D');
 
         // COG_Z
         b->AddVar("COG_Z_5_0",          'D');
@@ -78,7 +78,7 @@ Int_t main(Int_t argc, char* argv[])
         b->AddVar("COG_Z_5_5",          'D');
         b->AddVar("COG_Z_5_6",          'D');
         b->AddVar("COG_Z_5_7",          'D');
-        b->AddVar("COG_Z_overall",      'D');
+        b->AddVar("COG_Z_mean",         'D');
 
         b->AddVar("E1E9",               'D');
         b->AddVar("E9E25",              'D');
@@ -167,14 +167,14 @@ Int_t main(Int_t argc, char* argv[])
         b->AddVar("zdepth",             'D');
 
         // Signal
-        b->AddTrainSig("/lustre/collider/chenjiyuan/ahcal-pid/build/geometry/train_pion.root", tree);
-        b->AddTestSig ("/lustre/collider/chenjiyuan/ahcal-pid/build/geometry/test_pion.root",  tree);
+        b->AddTrainSig("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_train_pion.root", tree);
+        b->AddTestSig ("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_test_pion.root",  tree);
 
         // Background
-//        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/build/geometry/train_muon.root", tree);
-        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/build/geometry/train_e.root",    tree);
-//        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/build/geometry/test_muon.root",  tree);
-        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/build/geometry/test_e.root",     tree);
+//        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_train_muon.root", tree);
+        b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_train_e.root",    tree);
+//        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_test_muon.root",  tree);
+        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/run/digi/output/rec_sel_test_e.root",     tree);
 
         b->TrainBDT();
 
