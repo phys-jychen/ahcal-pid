@@ -712,45 +712,45 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     .Define("COG_Z_5_6", "COG_Z_5[6]")
     .Define("COG_Z_5_7", "COG_Z_5[7]")
     // The overall centre of gravity, in x direction
-    .Define("COG_X_overall", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
+    .Define("COG_X_mean", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
     {
-        Double_t cog_x_overall = 0;
+        Double_t cog_x_mean = 0;
         if (Edep == 0)
             return 400.0;
         else
         {
             for (Int_t i = 0; i < nhits; i++)
-                cog_x_overall += Hit_X_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-            cog_x_overall /= Edep;
-            return cog_x_overall;
+                cog_x_mean += Hit_X_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+            cog_x_mean /= Edep;
+            return cog_x_mean;
         }
     }, {"Hit_X_nonzero", "Hit_Energy_nonzero", "Edep", "nhits"})
     // The overall centre of gravity, in y direction
-    .Define("COG_Y_overall", [] (vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
+    .Define("COG_Y_mean", [] (vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
     {
-        Double_t cog_y_overall = 0;
+        Double_t cog_y_mean = 0;
         if (Edep == 0)
             return 400.0;
         else
         {
             for (Int_t i = 0; i < nhits; i++)
-                cog_y_overall += Hit_Y_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-            cog_y_overall /= Edep;
-            return cog_y_overall;
+                cog_y_mean += Hit_Y_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+            cog_y_mean /= Edep;
+            return cog_y_mean;
         }
     }, {"Hit_Y_nonzero", "Hit_Energy_nonzero", "Edep", "nhits"})
     // The overall centre of gravity, in z direction
-    .Define("COG_Z_overall", [] (vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
+    .Define("COG_Z_mean", [] (vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
     {
-        Double_t cog_z_overall = 0;
+        Double_t cog_z_mean = 0;
         if (Edep == 0)
             return 1500.0;
         else
         {
             for (Int_t i = 0; i < nhits; i++)
-                cog_z_overall += Hit_Z_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-            cog_z_overall /= Edep;
-            return cog_z_overall;
+                cog_z_mean += Hit_Z_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+            cog_z_mean /= Edep;
+            return cog_z_mean;
         }
     }, {"Hit_Z_nonzero", "Hit_Energy_nonzero", "Edep", "nhits"})
     /*

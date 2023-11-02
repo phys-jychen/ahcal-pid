@@ -120,7 +120,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     Float_t  bdt_COG_X_5_5;
     Float_t  bdt_COG_X_5_6;
     Float_t  bdt_COG_X_5_7;
-    Float_t  bdt_COG_X_overall;
+    Float_t  bdt_COG_X_mean;
 
     Float_t  bdt_COG_Y_5_0;
     Float_t  bdt_COG_Y_5_1;
@@ -130,7 +130,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     Float_t  bdt_COG_Y_5_5;
     Float_t  bdt_COG_Y_5_6;
     Float_t  bdt_COG_Y_5_7;
-    Float_t  bdt_COG_Y_overall;
+    Float_t  bdt_COG_Y_mean;
 
     Float_t  bdt_COG_Z_5_0;
     Float_t  bdt_COG_Z_5_1;
@@ -140,7 +140,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     Float_t  bdt_COG_Z_5_5;
     Float_t  bdt_COG_Z_5_6;
     Float_t  bdt_COG_Z_5_7;
-    Float_t  bdt_COG_Z_overall;
+    Float_t  bdt_COG_Z_mean;
 
     Float_t  bdt_E1E9;
     Float_t  bdt_E9E25;
@@ -234,7 +234,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     reader->AddVariable("COG_X_5_5",          &bdt_COG_X_5_5);
     reader->AddVariable("COG_X_5_6",          &bdt_COG_X_5_6);
     reader->AddVariable("COG_X_5_7",          &bdt_COG_X_5_7);
-    reader->AddVariable("COG_X_overall",      &bdt_COG_X_overall);
+    reader->AddVariable("COG_X_mean",         &bdt_COG_X_mean);
 
     reader->AddVariable("COG_Y_5_0",          &bdt_COG_X_5_0);
     reader->AddVariable("COG_Y_5_1",          &bdt_COG_X_5_1);
@@ -244,7 +244,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     reader->AddVariable("COG_Y_5_5",          &bdt_COG_X_5_5);
     reader->AddVariable("COG_Y_5_6",          &bdt_COG_X_5_6);
     reader->AddVariable("COG_Y_5_7",          &bdt_COG_X_5_7);
-    reader->AddVariable("COG_Y_overall",      &bdt_COG_Y_overall);
+    reader->AddVariable("COG_Y_mean",         &bdt_COG_Y_mean);
 
     reader->AddVariable("COG_Z_5_0",          &bdt_COG_X_5_0);
     reader->AddVariable("COG_Z_5_1",          &bdt_COG_X_5_1);
@@ -254,7 +254,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     reader->AddVariable("COG_Z_5_5",          &bdt_COG_X_5_5);
     reader->AddVariable("COG_Z_5_6",          &bdt_COG_X_5_6);
     reader->AddVariable("COG_Z_5_7",          &bdt_COG_X_5_7);
-    reader->AddVariable("COG_Z_overall",      &bdt_COG_Z_overall);
+    reader->AddVariable("COG_Z_mean",         &bdt_COG_Z_mean);
 
     reader->AddVariable("E1E9",               &bdt_E1E9);
     reader->AddVariable("E9E25",              &bdt_E9E25);
@@ -353,7 +353,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     rdf_input.emplace_back("COG_X_5_5");
     rdf_input.emplace_back("COG_X_5_6");
     rdf_input.emplace_back("COG_X_5_7");
-    rdf_input.emplace_back("COG_X_overall");
+    rdf_input.emplace_back("COG_X_mean");
 
     rdf_input.emplace_back("COG_Y_5_0");
     rdf_input.emplace_back("COG_Y_5_1");
@@ -363,7 +363,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     rdf_input.emplace_back("COG_Y_5_5");
     rdf_input.emplace_back("COG_Y_5_6");
     rdf_input.emplace_back("COG_Y_5_7");
-    rdf_input.emplace_back("COG_Y_overall");
+    rdf_input.emplace_back("COG_Y_mean");
 
     rdf_input.emplace_back("COG_Z_5_0");
     rdf_input.emplace_back("COG_Z_5_1");
@@ -373,7 +373,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     rdf_input.emplace_back("COG_Z_5_5");
     rdf_input.emplace_back("COG_Z_5_6");
     rdf_input.emplace_back("COG_Z_5_7");
-    rdf_input.emplace_back("COG_Z_overall");
+    rdf_input.emplace_back("COG_Z_mean");
 
     rdf_input.emplace_back("E1E9");
     rdf_input.emplace_back("E9E25");
@@ -470,7 +470,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
          Double_t COG_X_5_5,
          Double_t COG_X_5_6,
          Double_t COG_X_5_7,
-         Double_t COG_X_overall,
+         Double_t COG_X_mean,
          Double_t COG_Y_5_0,
          Double_t COG_Y_5_1,
          Double_t COG_Y_5_2,
@@ -479,7 +479,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
          Double_t COG_Y_5_5,
          Double_t COG_Y_5_6,
          Double_t COG_Y_5_7,
-         Double_t COG_Y_overall,
+         Double_t COG_Y_mean,
          Double_t COG_Z_5_0,
          Double_t COG_Z_5_1,
          Double_t COG_Z_5_2,
@@ -488,7 +488,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
          Double_t COG_Z_5_5,
          Double_t COG_Z_5_6,
          Double_t COG_Z_5_7,
-         Double_t COG_Z_overall,
+         Double_t COG_Z_mean,
          Double_t E1E9,
          Double_t E9E25,
          Double_t E9E49,
@@ -578,7 +578,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
         bdt_COG_X_5_5          = COG_X_5_5;
         bdt_COG_X_5_6          = COG_X_5_6;
         bdt_COG_X_5_7          = COG_X_5_7;
-        bdt_COG_X_overall      = COG_X_overall;
+        bdt_COG_X_mean         = COG_X_mean;
 
         bdt_COG_Y_5_0          = COG_Y_5_0;
         bdt_COG_Y_5_1          = COG_Y_5_1;
@@ -588,7 +588,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
         bdt_COG_Y_5_5          = COG_Y_5_5;
         bdt_COG_Y_5_6          = COG_Y_5_6;
         bdt_COG_Y_5_7          = COG_Y_5_7;
-        bdt_COG_Y_overall      = COG_Y_overall;
+        bdt_COG_Y_mean         = COG_Y_mean;
 
         bdt_COG_Z_5_0          = COG_Z_5_0;
         bdt_COG_Z_5_1          = COG_Z_5_1;
@@ -598,7 +598,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
         bdt_COG_Z_5_5          = COG_Z_5_5;
         bdt_COG_Z_5_6          = COG_Z_5_6;
         bdt_COG_Z_5_7          = COG_Z_5_7;
-        bdt_COG_Z_overall      = COG_Z_overall;
+        bdt_COG_Z_mean         = COG_Z_mean;
 
         bdt_E1E9               = E1E9;
         bdt_E9E25              = E9E25;
