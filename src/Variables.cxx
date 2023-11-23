@@ -160,8 +160,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         }
         return Ecell;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
-    // The number of fired cells
-    .Define("ncells", "(Int_t) Ecell.at(0).size()")
     // The maximum energy deposition as well as the ID of the fired cells
     .Define("Ecell_max_id", [] (vector<vector<Double_t>> Ecell, Int_t ncells)
     {
