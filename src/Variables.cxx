@@ -19,7 +19,7 @@ const Int_t nLayer = 40;
 const Double_t BiasX = 0.5 * (nCellX - 1) * PeriodX;
 const Double_t BiasY = 0.5 * (nCellY - 1) * PeriodY;
 
-Int_t NHScaleV2(RVec<Double_t> pos_x, RVec<Double_t> pos_y, RVec<Double_t> pos_z, Int_t RatioX, Int_t RatioY, Int_t RatioZ)
+Int_t NHScaleV2(vector<Double_t> pos_x, vector<Double_t> pos_y, vector<Double_t> pos_z, Int_t RatioX, Int_t RatioY, Int_t RatioZ)
 {
     Int_t ReScaledNH = 0;
     Int_t tmpI = 0;
@@ -161,17 +161,17 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return Ecell;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
     // The maximum energy deposition as well as the ID of the fired cells
-    .Define("Ecell_max_id", [] (vector<vector<Double_t>> Ecell, Int_t ncells)
+    .Define("Ecell_max_id", [] (vector<vector<Double_t>> Ecell, Int_t nhits)
     {
-        vector<Double_t> Ecell_max_id = { (Double_t) ncells, 0.0 };
-        for (Int_t i = 0; i < ncells; i++)
+        vector<Double_t> Ecell_max_id = { (Double_t) nhits, 0.0 };
+        for (Int_t i = 0; i < nhits; i++)
             if (Ecell.at(1).at(i) > Ecell_max_id.at(1))
             {
                 Ecell_max_id.at(0) = Ecell.at(0).at(i);
                 Ecell_max_id.at(1) = Ecell.at(1).at(i);
             }
         return Ecell_max_id;
-    }, {"Ecell", "ncells"})
+    }, {"Ecell", "nhits"})
     .Define("Ecell_max", "Ecell_max_id[1]")
     // The energy deposition in the 3*3 cells around the one with maximum energy deposition
     .Define("Ecell_max_9", [] (vector<vector<Double_t>> Ecell, vector<Double_t> Ecell_max_id)
@@ -453,8 +453,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // The distance between the layer with largest RMS value of position and the beginning layer
     .Define("shower_length", [] (vector<Double_t> layer_rms, Int_t shower_start)
     {
-        Double_t shower_length = 0.0;
-        Double_t startz = shower_start * Thick;
+        Int_t shower_length = 0;
         Int_t max_layer = 0;
         Double_t max_rms = 0.0;
         for (Int_t i = 0; i < layer_rms.size(); i++)
@@ -466,13 +465,13 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
 //        auto maxPosition = max_element(layer_rms.begin() + shower_start, layer_rms.end());
 //        Int_t max_layer = maxPosition - layer_rms.begin();
         if (shower_start >= max_layer)
-            shower_length = 0.0;
+            shower_length = 0;
         else
-            shower_length = (max_layer - shower_start) * Thick;
+            shower_length = max_layer - shower_start;
         return shower_length;
     }, {"layer_rms", "shower_start"})
     // 2-dimensional fractal dimension
-    .Define("FD_2D", [] (RVec<Double_t> const& pos_x, RVec<Double_t> const& pos_y, RVec<Double_t> const& pos_z, Int_t nhits)
+    .Define("FD_2D", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, Int_t nhits)
     {
         vector<Int_t> scale = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150 };
         const Int_t num = scale.size();
@@ -480,7 +479,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         vector<Int_t> NResizeHit(num);
         for (Int_t i = 0; i < num; i++)
         {
-            NResizeHit.at(i) = NHScaleV2(pos_x, pos_y, pos_z, scale.at(i), scale.at(i), 1);
+            NResizeHit.at(i) = NHScaleV2(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, scale.at(i), scale.at(i), 1);
             if (nhits == 0 || NResizeHit.at(i) <= 0)
             {
                 fd_2d.at(i) = -1.0;
@@ -516,7 +515,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     .Define("FD_2D_140", "FD_2D[23]")
     .Define("FD_2D_150", "FD_2D[24]")
     // 3-dimensional fractal dimension
-    .Define("FD_3D", [] (RVec<Double_t> const& pos_x, RVec<Double_t> const& pos_y, RVec<Double_t> const& pos_z, Int_t nhits)
+    .Define("FD_3D", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, Int_t nhits)
     {
         vector<Int_t> scale = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150 };
         const Int_t num = scale.size();
@@ -524,7 +523,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         vector<Int_t> NResizeHit(num);
         for (Int_t i = 0; i < num; i++)
         {
-            NResizeHit.at(i) = NHScaleV2(pos_x, pos_y, pos_z, scale.at(i), scale.at(i), scale.at(i));
+            NResizeHit.at(i) = NHScaleV2(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, scale.at(i), scale.at(i), scale.at(i));
             if (nhits == 0 || NResizeHit.at(i) <= 0)
             {
                 fd_3d.at(i) = -1.0;
