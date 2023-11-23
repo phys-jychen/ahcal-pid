@@ -387,7 +387,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // Number of layers with xwidth, ywidth >= 60 mm
     .Define("shower_layer", [] (vector<Double_t> layer_xwidth, vector<Double_t> layer_ywidth)
     {
-        Double_t shower_layer = 0;
+        Int_t shower_layer = 0;
         for (Int_t i = 0; i < nLayer; i++)
             if (layer_xwidth.at(i) >= 60 && layer_ywidth.at(i) >= 60)
                 shower_layer++;
@@ -396,7 +396,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // Number of layers with at least one hit
     .Define("hit_layer", [] (vector<Int_t> layer)
     {
-        Double_t hit_layer = 0;
+        Int_t hit_layer = 0;
         unordered_map<Int_t, Int_t> map_layer_hit;
         for (Double_t i : layer)
             map_layer_hit[i]++;
@@ -407,12 +407,12 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     }, {"layer"})
     // The proportion of layers with xwidth, ywidth >= 60 mm within the layers with at least one hit
 //    .Define("shower_layer_ratio", "shower_layer / hit_layer")
-    .Define("shower_layer_ratio", [] (Double_t shower_layer, Double_t hit_layer, Int_t nhits)
+    .Define("shower_layer_ratio", [] (Int_t shower_layer, Int_t hit_layer, Int_t nhits)
     {
         if (nhits == 0)
             return 0.0;
         else
-            return shower_layer / hit_layer;
+            return (Double_t) shower_layer / (Double_t) hit_layer;
     }, {"shower_layer", "hit_layer", "nhits"})
     // Average number of hits in the 3*3 cells around a given one
     .Define("shower_density", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)

@@ -149,14 +149,14 @@ Int_t main(Int_t argc, Char_t* argv[])
         b->AddVar("FD_3D_mean",         'D');
         b->AddVar("FD_3D_rms",          'D');
 
-        b->AddVar("hit_layer",          'D');
+        b->AddVar("hit_layer",          'I');
 //        b->AddVar("hit_time_mean",      'D');
 //        b->AddVar("hit_time_rms",       'D');
         b->AddVar("nhits",              'I');
         b->AddVar("ntrack",             'D');
         b->AddVar("shower_density",     'D');
         b->AddVar("shower_end",         'I');
-        b->AddVar("shower_layer",       'D');
+        b->AddVar("shower_layer",       'I');
         b->AddVar("shower_layer_ratio", 'D');
         b->AddVar("shower_length",      'D');
         b->AddVar("shower_radius",      'D');
