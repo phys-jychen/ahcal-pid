@@ -257,6 +257,24 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         else
             return Ecell_max / Ecell_max_9;
     }, {"Ecell_max", "Ecell_max_9", "nhits"})
+    // Energy deposition of the central cell divided by the total energy deposition in the 5*5 cells around it
+//    .Define("E1E25", "Ecell_max_id.at(1) / Ecell_max_25")
+    .Define("E1E25", [] (Double_t Ecell_max, Double_t Ecell_max_25, Int_t nhits)
+    {
+        if (nhits == 0)
+            return 0.0;
+        else
+            return Ecell_max / Ecell_max_25;
+    }, {"Ecell_max", "Ecell_max_25", "nhits"})
+    // Energy deposition of the central cell divided by the total energy deposition in the 7*7 cells around it
+//    .Define("E1E49", "Ecell_max_id.at(1) / Ecell_max_49")
+    .Define("E1E49", [] (Double_t Ecell_max, Double_t Ecell_max_49, Int_t nhits)
+    {
+        if (nhits == 0)
+            return 0.0;
+        else
+            return Ecell_max / Ecell_max_49;
+    }, {"Ecell_max", "Ecell_max_49", "nhits"})
     // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 5*5 cells around it
 //    .Define("E9E25", "Ecell_max_9 / Ecell_max_25")
     .Define("E9E25", [] (Double_t Ecell_max_9, Double_t Ecell_max_25, Int_t nhits)
