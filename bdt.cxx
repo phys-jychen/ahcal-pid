@@ -167,6 +167,38 @@ Int_t main(Int_t argc, Char_t* argv[])
         b->AddVar("ywidth",             'D');
         b->AddVar("zdepth",             'D');
 
+        vector<Int_t> energy_e  = { 10, 20, 30, 40, 50, 60, 70, 80, 100, 120, 150, 250 };
+        vector<Int_t> energy_pi = { 10, 15, 20, 30, 40, 50, 60, 70, 80, 100, 120 };
+
+        // MC (SJTU)
+        string path_train = "/lustre/collider/chenjiyuan/ahcal-pid/run/geometry/output/x40_y40_layer40/training/";
+        string path_test  = "/lustre/collider/chenjiyuan/ahcal-pid/run/geometry/output/x40_y40_layer40/test/";
+
+        /*
+        // MC (IHEP)
+        string path_train = "/lustre/collider/chenjiyuan/ahcal-pid/run/ihep_new/output/training/";
+        string path_test  = "/lustre/collider/chenjiyuan/ahcal-pid/run/ihep_new/output/test/";
+
+        // Test beam data (2023)
+        string path_train = "/lustre/collider/chenjiyuan/ahcal-pid/run/data/output/training/";
+        string path_test  = "/lustre/collider/chenjiyuan/ahcal-pid/run/data/output/test/";
+        */
+
+        // Signal
+        for (Int_t i = 0; i < energy_e.size(); i++)
+        {
+            b->AddTrainSig(path_train + "rec_sel_e-_" + to_string(energy_e.at(i)) + "GeV.root", tree);
+            b->AddTestSig( path_test  + "rec_sel_e-_" + to_string(energy_e.at(i)) + "GeV.root", tree);
+        }
+
+        // Background
+        for (Int_t i = 0; i < energy_pi.size(); i++)
+        {
+            b->AddTrainBkg(path_train + "rec_sel_pi-_" + to_string(energy_pi.at(i)) + "GeV.root", tree);
+            b->AddTestBkg( path_test  + "rec_sel_pi-_" + to_string(energy_pi.at(i)) + "GeV.root", tree);
+        }
+
+        /*
         // Signal
         b->AddTrainSig("/lustre/collider/chenjiyuan/ahcal-pid/run/geometry/output/x40_y40_layer40/rec_sel_train_pion.root", tree);
         b->AddTestSig ("/lustre/collider/chenjiyuan/ahcal-pid/run/geometry/output/x40_y40_layer40/rec_sel_test_pion.root",  tree);
@@ -176,6 +208,7 @@ Int_t main(Int_t argc, Char_t* argv[])
         b->AddTrainBkg("/lustre/collider/chenjiyuan/ahcal-pid/run/geometry/output/x40_y40_layer40/rec_sel_train_e.root",    tree);
 //        b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/run/geometry/output/x40_y40_layer40/rec_sel_test_muon.root",  tree);
         b->AddTestBkg ("/lustre/collider/chenjiyuan/ahcal-pid/run/geometry/output/x40_y40_layer40/rec_sel_test_e.root",     tree);
+        */
 
         b->TrainBDT();
 

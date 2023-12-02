@@ -1,5 +1,8 @@
 #include "Select.h"
 
+const Double_t threshold = 0;
+//const Double_t threshold = 0.233;    // Selection criterion only for test beam data
+
 Select::Select() {}
 
 Select::~Select() {}
@@ -26,7 +29,7 @@ Int_t Select::ValidHits(const string& file, const string& tree)
     {
         vector<Double_t> Hit_X_nonzero;
         for (Int_t i = 0; i < nhits; i++)
-            if (Hit_Energy.at(i) > 0)
+            if (Hit_Energy.at(i) > threshold)
                 Hit_X_nonzero.emplace_back(Hit_X.at(i));
         return Hit_X_nonzero;
     }, {"Hit_X", "Hit_Energy", "nhits"})
@@ -34,7 +37,7 @@ Int_t Select::ValidHits(const string& file, const string& tree)
     {
         vector<Double_t> Hit_Y_nonzero;
         for (Int_t i = 0; i < nhits; i++)
-            if (Hit_Energy.at(i) > 0)
+            if (Hit_Energy.at(i) > threshold)
                 Hit_Y_nonzero.emplace_back(Hit_Y.at(i));
         return Hit_Y_nonzero;
     }, {"Hit_Y", "Hit_Energy", "nhits"})
@@ -42,7 +45,7 @@ Int_t Select::ValidHits(const string& file, const string& tree)
     {
         vector<Double_t> Hit_Z_nonzero;
         for (Int_t i = 0; i < nhits; i++)
-            if (Hit_Energy.at(i) > 0)
+            if (Hit_Energy.at(i) > threshold)
                 Hit_Z_nonzero.emplace_back(Hit_Z.at(i));
         return Hit_Z_nonzero;
     }, {"Hit_Z", "Hit_Energy", "nhits"})
@@ -86,7 +89,7 @@ Int_t Select::ValidHits(const string& file, const string& tree)
     {
         vector<Double_t> Hit_Energy_nonzero;
         for (Int_t i = 0; i < nhits; i++)
-            if (Hit_Energy.at(i) > 0)
+            if (Hit_Energy.at(i) > threshold)
                 Hit_Energy_nonzero.emplace_back(Hit_Energy.at(i));
         return Hit_Energy_nonzero;
     }, {"Hit_Energy", "nhits"})
@@ -95,11 +98,17 @@ Int_t Select::ValidHits(const string& file, const string& tree)
 
     TFile* f = new TFile((TString) outname, "READ");
     TTree* t = f->Get<TTree>((TString) tree);
+    /*
     t->SetBranchStatus("*", 1);
 //    vector<TString> deactivate = { "CellID", "Hit_Energy", "Hit_Time", "Hit_X", "Hit_Y", "Hit_Z", "nhits" };
     vector<TString> deactivate = { "CellID", "Hit_Energy", "Hit_X", "Hit_Y", "Hit_Z", "nhits" };
     for (TString de : deactivate)
         t->SetBranchStatus(de, 0);
+    */
+    t->SetBranchStatus("*", 0);
+    vector<TString> remains = { "Hit_Energy_nonzero", "Hit_Phi_nonzero", "Hit_Theta_nonzero", "Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero"};
+    for (TString re : remains)
+        t->SetBranchStatus(re, 1);
     TFile* fnew = new TFile((TString) outname, "RECREATE");
     TTree* tnew = t->CloneTree();
     tnew->Write(0, TObject::kWriteDelete, 0);

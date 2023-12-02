@@ -4,10 +4,10 @@
 Ji-Yuan CHEN (SJTU; <jy_chen@sjtu.edu.cn>)
 
 ## Description
-This program was designed for the PID of CEPC AHCAL.  By reconstructing variables describing the topology of the hadronic and electromagnetic shower, we can perform PID with the help of BDT, using the TMVA (the **T**oolkit for **M**ulti-**V**ariate data **A**nalysis with ROOT) package.
+This program is designed for the PID of CEPC AHCAL. By reconstructing variables describing the topology of the hadronic and electromagnetic shower, we can perform PID with the help of BDT, using the TMVA (the **T**oolkit for **M**ulti-**V**ariate data **A**nalysis with ROOT) package.
 
 ## Usage
-First of all, you can run
+At first, you can run
 ```shell
 iSel -h[elp]
 # or
@@ -15,66 +15,66 @@ iRec -h[elp]
 # or
 iBDT -h[elp]
 ```
-to display help information.  For more detail, please refer to the following instructions. :p
+to display help information. For more detail, please refer to the following instructions. :stuck_out_tongue:
 
 ### Selecting Hits
-In MC samples or even real data, some of the hits do not deposit energy in the scintillator, or the energy deposition is a negative number.  In these cases, the hits are misleading and not useful in our analysis; therefore, they should be discarded.  To achieve this, run
+In MC samples or even real data, some hits do not deposit energy in the scintillator, or the energy deposition is a negative number. In these cases, the hits are misleading and not useful in our analysis; therefore, they should be discarded. To achieve this, run
 ```shell
 iSel -f [file]
 ```
-if the tree in the original ROOT file has default name `Calib_Hit`.  Otherwise, to specify other names, run
+if the tree in the original ROOT file has default name `Calib_Hit`. Otherwise, to specify other tree names, run
 ```shell
 iSel -f [file] -t [tree]
 ```
 
-After the execution finishes, an output file whose name has a prefix "sel" is created in your current directory, regardless of where the original ROOT file is.  The original branches have already been deleted to save space.
+After the execution finishes, an output file whose name has a prefix “sel” is created in your current directory, regardless of where the original ROOT file is. The original branches have already been deleted to save space.
 
 ### Adding Reconstructed Variables
 In any directory, execute:
 ```shell
 iRec -f [file]
 ```
-if the tree in the original ROOT file has default name `Calib_Hit`.  Otherwise, to specify other names, run
+if the tree in the original ROOT file has default name `Calib_Hit`. Otherwise, to specify other names, run
 ```shell
 iRec -f [file] -t [tree]
 ```
 
-The name of the output file is given a prefix "rec" in your current directory, and the original branches are not kept for the sake of saving space.  If you need to add some new variables or modify the definitions of some of them, please go to the file `src/Variables.cxx`.
+The name of the output file is given a prefix “rec” in your current directory, and the original branches are not kept for the sake of saving space. If you need to add some new variables or modify the definitions of some of them, please go to the file `src/Variables.cxx`.
 
 ### Performing BDT
-Before you begin, make sure that the variables as well as the ROOT files listed in `bdt.cxx` are all present (you can also modify this file to meet your own needs).  Then, execute:
+Before you begin, make sure that the variables as well as the ROOT files listed in `bdt.cxx` are all present (you can also modify this file to meet your own needs). Then, execute:
 ```shell
 iBDT -r
 ```
-if the trees in the original ROOT files all have default name `Calib_Hit`.  Otherwise, to specify other names, run
+if the trees in the original ROOT files all have default name `Calib_Hit`. Otherwise, to specify other names, run
 ```shell
 iBDT -r -t [tree]
 ```
 
-Eventually you can see the output file containing the data obtained during training and test (`TMVAMulticlass.root`) in your current directory.
+Eventually, you can see the output file containing the data obtained during training and test (`TMVAMulticlass.root`) in your current directory.
 
-Possibly you need to know the performance of BDT on the validation dataset.  In this case, execute:
+Possibly you need to know the performance of BDT on the validation dataset. In this case, execute:
 ```shell
 iBDT -v -f [file]
 ```
-if the tree in the original ROOT file has default name `Calib_Hit`.  Otherwise, to specify other names, run
+if the tree in the original ROOT file has default name `Calib_Hit`. Otherwise, to specify other tree names, run
 ```shell
 iBDT -v -f [file] -t [tree]
 ```
 
-Then the BDT response is stored in the output ROOT file, whose name has a prefix "bdt", in your current directory.  Possibly it is necessary to modify `src/BDT.cxx`.  Anyway, make sure that the input variables are exactly the same as those in `bdt.cxx`!
+Then the BDT response is stored in the output ROOT file, whose name has a prefix “bdt”, in your current directory. Possibly it is necessary to modify `src/BDT.cxx`. Anyway, make sure that the input variables are identical to those in `bdt.cxx`!
 
 ## Environment Set-up
-This project requires CMake version >= 3.17.  If you are working on the cluster of INPAC, IHEP, etc., the environment can be easily set up by simply executing
+This project requires CMake version >= 3.17. If you are working on the cluster of INPAC, IHEP, etc., the environment can be easily set up by simply executing
 ```shell
 source /cvmfs/sft.cern.ch/lcg/views/LCG_102/x86_64-centos7-gcc11-opt/setup.sh
 ```
 (This command has been included in `setup.sh`.)
 
-Then, the environment with CMake 3.20.0 and ROOT 6.26/04 is configured.  As long as no compilation errors are raised and the CMake version requirement is met, other versions on the LCG are also acceptable. :p
+Then, the environment with CMake 3.20.0 and ROOT 6.26/04 is configured. As long as neither compilation errors are raised, nor the CMake version requirement is met, other versions on the LCG are also acceptable. :stuck_out_tongue:
 
 ## Installation & Compilation
-Having set up the environment, this project can be cloned from GitHub and compiled in a normal way:
+Having set up the environment, this project can be cloned from GitHub and compiled as usual:
 ```shell
 git clone git@github.com:phys-jychen/ahcal-pid.git
 cd ahcal-pid
@@ -90,7 +90,7 @@ Every time you log in to the cluster, before the first time of running this prog
 source <build_dir>/setup.sh
 ```
 
-By now, the compilation have been finished.  Prepare your datasets, and have fun!
+By now, the compilation have been finished. Prepare your datasets, and have fun! :relaxed:
 
 ## Acknowledgement & Reference
-The author would like to thank Mr Zhen WANG (TDLI/SJTU), for kindly offering his project [cepc\_hbuana](https://github.com/wangz1996/cepc_hbuana) for the convenience of going through the whole process of BDT.  In this project (AHCAL-PID), the framework of reconstructing variables and BDT are adopted from cepc\_hbuana.
+The author would like to thank Mr Zhen WANG (TDLI/SJTU), for kindly offering his project [cepc\_hbuana](https://github.com/wangz1996/cepc_hbuana) for the convenience of going through the whole process of BDT. In this project (AHCAL-PID), the framework of reconstructing variables and BDT are adopted from cepc\_hbuana.

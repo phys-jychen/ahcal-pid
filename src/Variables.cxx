@@ -94,36 +94,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             layer_energy.at(layer.at(i)) += Hit_Energy_nonzero.at(i);
         return layer_energy;
     }, {"layer", "Hit_Energy_nonzero", "nhits"})
-    // RMS width in x direction
-    .Define("xwidth", [] (vector<Double_t> Hit_X_nonzero)
-    {
-        TH1D* h1 = new TH1D("h1", "", 100, -400, 400);
-        for (Double_t i : Hit_X_nonzero)
-            h1->Fill(i);
-        Double_t xwidth = h1->GetRMS();
-        delete h1;
-        return xwidth;
-    }, {"Hit_X_nonzero"})
-    // RMS width in y direction
-    .Define("ywidth", [] (vector<Double_t> Hit_Y_nonzero)
-    {
-        TH1D* h1 = new TH1D("h1", "", 100, -400, 400);
-        for (Double_t i : Hit_Y_nonzero)
-            h1->Fill(i);
-        Double_t ywidth = h1->GetRMS();
-        delete h1;
-        return ywidth;
-    }, {"Hit_Y_nonzero"})
-    // RMS depth
-    .Define("zdepth", [] (vector<Double_t> Hit_Z_nonzero)
-    {
-        TH1D* h1 = new TH1D("h1", "", 100, 0, 1200);
-        for (Double_t i : Hit_Z_nonzero)
-            h1->Fill(i);
-        Double_t zdepth = h1->GetRMS();
-        delete h1;
-        return zdepth;
-    }, {"Hit_Z_nonzero"})
     // Total energy deposition
     .Define("Edep", [] (vector<Double_t> Hit_Energy_nonzero)
     {
@@ -133,7 +103,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return sum;
     }, {"Hit_Energy_nonzero"})
     // Average energy deposition of the hits
-//    .Define("Emean", "Edep / nhits")
     .Define("Emean", [] (Double_t Edep, Int_t nhits)
     {
         if (nhits == 0)
@@ -141,6 +110,188 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         else
             return Edep / nhits;
     }, {"Edep", "nhits"})
+    /*
+    // Centre of gravity of each layer, in x direction
+    .Define("COG_X", [] (vector<Double_t> Hit_X_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
+    {
+        vector<Double_t> cog_x(nLayer);
+        for (Int_t i = 0; i < nhits; i++)
+            cog_x.at(layer.at(i)) += Hit_X_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+        for (Int_t j = 0; j < cog_x.size(); j++)
+        {
+            if (cog_x.at(j) == 0)
+                continue;
+            else
+                cog_x.at(j) /= layer_energy.at(j);
+        }
+        return cog_x;
+    }, {"Hit_X_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
+    // Centre of gravity of each layer, in y direction
+    .Define("COG_Y", [] (vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
+    {
+        vector<Double_t> cog_y(nLayer);
+        for (Int_t i = 0; i < nhits; i++)
+            cog_y.at(layer.at(i)) += Hit_Y_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+        for (Int_t j = 0; j < cog_y.size(); j++)
+        {
+            if (cog_y.at(j) == 0)
+                continue;
+            else
+                cog_y.at(j) /= layer_energy.at(j);
+        }
+        return cog_y;
+    }, {"Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
+    */
+    // Centre of gravity of every 5 layers, in x direction
+    .Define("COG_X_5", [] (vector<Double_t> Hit_X_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
+    {
+        vector<Double_t> cog_x_5(nLayer / 5);
+        vector<Double_t> energy_5layer(nLayer / 5);
+        for (Int_t i = 0; i < nhits; i++)
+            cog_x_5.at(layer.at(i) / 5) += Hit_X_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+        for (Int_t j = 0; j < nLayer; j++)
+            energy_5layer.at(j / 5) += layer_energy.at(j);
+        for (Int_t k = 0; k < nLayer / 5; k++)
+        {
+            if (cog_x_5.at(k) == 0)
+                cog_x_5.at(k) = 400.0;
+            else
+                cog_x_5.at(k) /= energy_5layer.at(k);
+        }
+        return cog_x_5;
+    }, {"Hit_X_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
+    .Define("COG_X_5_0", "COG_X_5[0]")
+    .Define("COG_X_5_1", "COG_X_5[1]")
+    .Define("COG_X_5_2", "COG_X_5[2]")
+    .Define("COG_X_5_3", "COG_X_5[3]")
+    .Define("COG_X_5_4", "COG_X_5[4]")
+    .Define("COG_X_5_5", "COG_X_5[5]")
+    .Define("COG_X_5_6", "COG_X_5[6]")
+    .Define("COG_X_5_7", "COG_X_5[7]")
+    // Centre of gravity of every 5 layers, in y direction
+    .Define("COG_Y_5", [] (vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
+    {
+        vector<Double_t> cog_y_5(nLayer / 5);
+        vector<Double_t> energy_5layer(nLayer / 5);
+        for (Int_t i = 0; i < nhits; i++)
+            cog_y_5.at(layer.at(i) / 5) += Hit_Y_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+        for (Int_t j = 0; j < nLayer; j++)
+            energy_5layer.at(j / 5) += layer_energy.at(j);
+        for (Int_t k = 0; k < nLayer / 5; k++)
+        {
+            if (cog_y_5.at(k) == 0)
+                cog_y_5.at(k) = 400.0;
+            else
+                cog_y_5.at(k) /= energy_5layer.at(k);
+        }
+        return cog_y_5;
+    }, {"Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
+    .Define("COG_Y_5_0", "COG_Y_5[0]")
+    .Define("COG_Y_5_1", "COG_Y_5[1]")
+    .Define("COG_Y_5_2", "COG_Y_5[2]")
+    .Define("COG_Y_5_3", "COG_Y_5[3]")
+    .Define("COG_Y_5_4", "COG_Y_5[4]")
+    .Define("COG_Y_5_5", "COG_Y_5[5]")
+    .Define("COG_Y_5_6", "COG_Y_5[6]")
+    .Define("COG_Y_5_7", "COG_Y_5[7]")
+    // Centre of gravity of every 5 layers, in z direction
+    .Define("COG_Z_5", [] (vector<Double_t> Hit_Z_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
+    {
+        vector<Double_t> cog_z_5(nLayer / 5);
+        vector<Double_t> energy_5layer(nLayer / 5);
+        for (Int_t i = 0; i < nhits; i++)
+            cog_z_5.at(layer.at(i) / 5) += Hit_Z_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+        for (Int_t j = 0; j < nLayer; j++)
+            energy_5layer.at(j / 5) += layer_energy.at(j);
+        for (Int_t k = 0; k < nLayer / 5; k++)
+        {
+            if (cog_z_5.at(k) == 0)
+                cog_z_5.at(k) = 1500.0;
+            else
+                cog_z_5.at(k) /= energy_5layer.at(k);
+        }
+        return cog_z_5;
+    }, {"Hit_Z_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
+    .Define("COG_Z_5_0", "COG_Z_5[0]")
+    .Define("COG_Z_5_1", "COG_Z_5[1]")
+    .Define("COG_Z_5_2", "COG_Z_5[2]")
+    .Define("COG_Z_5_3", "COG_Z_5[3]")
+    .Define("COG_Z_5_4", "COG_Z_5[4]")
+    .Define("COG_Z_5_5", "COG_Z_5[5]")
+    .Define("COG_Z_5_6", "COG_Z_5[6]")
+    .Define("COG_Z_5_7", "COG_Z_5[7]")
+    // The average centre of gravity, in x direction
+    .Define("COG_X_mean", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
+    {
+        Double_t cog_x_mean = 0;
+        if (Edep == 0)
+            return 400.0;
+        else
+        {
+            for (Int_t i = 0; i < nhits; i++)
+                cog_x_mean += Hit_X_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+            cog_x_mean /= Edep;
+            return cog_x_mean;
+        }
+    }, {"Hit_X_nonzero", "Hit_Energy_nonzero", "Edep", "nhits"})
+    // The average centre of gravity, in y direction
+    .Define("COG_Y_mean", [] (vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
+    {
+        Double_t cog_y_mean = 0;
+        if (Edep == 0)
+            return 400.0;
+        else
+        {
+            for (Int_t i = 0; i < nhits; i++)
+                cog_y_mean += Hit_Y_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+            cog_y_mean /= Edep;
+            return cog_y_mean;
+        }
+    }, {"Hit_Y_nonzero", "Hit_Energy_nonzero", "Edep", "nhits"})
+    // The average centre of gravity, in z direction
+    .Define("COG_Z_mean", [] (vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
+    {
+        Double_t cog_z_mean = 0;
+        if (Edep == 0)
+            return 1500.0;
+        else
+        {
+            for (Int_t i = 0; i < nhits; i++)
+                cog_z_mean += Hit_Z_nonzero.at(i) * Hit_Energy_nonzero.at(i);
+            cog_z_mean /= Edep;
+            return cog_z_mean;
+        }
+    }, {"Hit_Z_nonzero", "Hit_Energy_nonzero", "Edep", "nhits"})
+    // RMS width in x direction
+    .Define("xwidth", [] (vector<Double_t> Hit_X_nonzero, Double_t COG_X_mean)
+    {
+        TH1D* h1 = new TH1D("h1", "", 100, -400, 400);
+        for (Double_t i : Hit_X_nonzero)
+            h1->Fill(i - COG_X_mean);
+        Double_t xwidth = h1->GetRMS();
+        delete h1;
+        return xwidth;
+    }, {"Hit_X_nonzero", "COG_X_mean"})
+    // RMS width in y direction
+    .Define("ywidth", [] (vector<Double_t> Hit_Y_nonzero, Double_t COG_Y_mean)
+    {
+        TH1D* h1 = new TH1D("h1", "", 100, -400, 400);
+        for (Double_t i : Hit_Y_nonzero)
+            h1->Fill(i - COG_Y_mean);
+        Double_t ywidth = h1->GetRMS();
+        delete h1;
+        return ywidth;
+    }, {"Hit_Y_nonzero", "COG_Y_mean"})
+    // RMS depth
+    .Define("zdepth", [] (vector<Double_t> Hit_Z_nonzero)
+    {
+        TH1D* h1 = new TH1D("h1", "", nLayer + 1, 0, (nLayer + 1) * Thick);
+        for (Double_t i : Hit_Z_nonzero)
+            h1->Fill(i);
+        Double_t zdepth = h1->GetRMS();
+        delete h1;
+        return zdepth;
+    }, {"Hit_Z_nonzero"})
     // The energy deposition of the fired cells
     .Define("Ecell", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)
     {
@@ -249,7 +400,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return Ecell_max_49;
     }, {"Ecell", "Ecell_max_id"})
     // Energy deposition of the central cell divided by the total energy deposition in the 3*3 cells around it
-//    .Define("E1E9", "Ecell_max_id.at(1) / Ecell_max_9")
     .Define("E1E9", [] (Double_t Ecell_max, Double_t Ecell_max_9, Int_t nhits)
     {
         if (nhits == 0)
@@ -258,7 +408,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             return Ecell_max / Ecell_max_9;
     }, {"Ecell_max", "Ecell_max_9", "nhits"})
     // Energy deposition of the central cell divided by the total energy deposition in the 5*5 cells around it
-//    .Define("E1E25", "Ecell_max_id.at(1) / Ecell_max_25")
     .Define("E1E25", [] (Double_t Ecell_max, Double_t Ecell_max_25, Int_t nhits)
     {
         if (nhits == 0)
@@ -267,7 +416,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             return Ecell_max / Ecell_max_25;
     }, {"Ecell_max", "Ecell_max_25", "nhits"})
     // Energy deposition of the central cell divided by the total energy deposition in the 7*7 cells around it
-//    .Define("E1E49", "Ecell_max_id.at(1) / Ecell_max_49")
     .Define("E1E49", [] (Double_t Ecell_max, Double_t Ecell_max_49, Int_t nhits)
     {
         if (nhits == 0)
@@ -276,7 +424,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             return Ecell_max / Ecell_max_49;
     }, {"Ecell_max", "Ecell_max_49", "nhits"})
     // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 5*5 cells around it
-//    .Define("E9E25", "Ecell_max_9 / Ecell_max_25")
     .Define("E9E25", [] (Double_t Ecell_max_9, Double_t Ecell_max_25, Int_t nhits)
     {
         if (nhits == 0)
@@ -285,7 +432,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             return Ecell_max_9 / Ecell_max_25;
     }, {"Ecell_max_9", "Ecell_max_25", "nhits"})
     // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 7*7 cells around it
-//    .Define("E9E49", "Ecell_max_9 / Ecell_max_49")
     .Define("E9E49", [] (Double_t Ecell_max_9, Double_t Ecell_max_49, Int_t nhits)
     {
         if (nhits == 0)
@@ -294,7 +440,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             return Ecell_max_9 / Ecell_max_49;
     }, {"Ecell_max_9", "Ecell_max_49", "nhits"})
     // RMS value of the positions of all the hits on a layer
-    .Define("layer_rms", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits)->vector<Double_t>
+    .Define("layer_rms", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, Int_t nhits, Double_t COG_X_mean, Double_t COG_Y_mean)->vector<Double_t>
     {
         vector<Double_t> layer_rms(nLayer);
         vector<TH2D*> hvec;
@@ -303,7 +449,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         for (Int_t i = 0; i < nhits; i++)
         {
             Int_t ilayer = layer.at(i);
-            hvec.at(ilayer)->Fill(Hit_X_nonzero.at(i), Hit_Y_nonzero.at(i), Hit_Energy_nonzero.at(i));
+            hvec.at(ilayer)->Fill(Hit_X_nonzero.at(i) - COG_X_mean, Hit_Y_nonzero.at(i) - COG_Y_mean, Hit_Energy_nonzero.at(i));
         }
         for (Int_t i = 0; i < hvec.size(); i++)
         {
@@ -315,7 +461,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         }
         vector<TH2D*>().swap(hvec);
         return layer_rms;
-    }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
+    }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits", "COG_X_mean", "COG_Y_mean"})
     // The layer where the shower begins; otherwise it is set to be 42
     .Define("shower_start", [] (vector<Int_t> hits_on_layer, vector<Double_t> layer_rms)
     {
@@ -334,8 +480,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         Int_t shower_end = nLayer + 2;
         if (shower_start == nLayer + 2)
             return shower_end;
-        for (Int_t i = shower_start; i < hits_on_layer.size() - 3; i++)
-            if (hits_on_layer.at(i) < 4 && hits_on_layer.at(i + 1) < 4)
+        for (Int_t i = shower_start; i < hits_on_layer.size() - 2; i++)
+            if (hits_on_layer.at(i) < 4 && hits_on_layer.at(i + 1) < 4 && hits_on_layer.at(i + 2))
             {
                 shower_end = i;
                 break;
@@ -345,7 +491,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return shower_end;
     }, {"hits_on_layer", "layer_rms", "shower_start"})
     // Shower radius of the shower (between beginning and ending layers)
-    .Define("shower_radius", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, Int_t beginning, Int_t ending, Int_t nhits)
+    .Define("shower_radius", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, Int_t beginning, Int_t ending, Int_t nhits, Double_t COG_X_mean, Double_t COG_Y_mean)
     {
         Double_t d2 = 0;
         Int_t hits = 0;
@@ -353,15 +499,15 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             if (layer.at(i) >= beginning && layer.at(i) < ending)
             {
                 hits++;
-                d2 += Power(Hit_X_nonzero.at(i), 2) + Power(Hit_Y_nonzero.at(i), 2);
+                d2 += Power(Hit_X_nonzero.at(i) - COG_X_mean, 2) + Power(Hit_Y_nonzero.at(i) - COG_Y_mean, 2);
             }
         if (hits == 0)
             return 0.0;
         Double_t radius = Sqrt(d2 / hits);
         return radius;
-    }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "shower_start", "shower_end", "nhits"})
+    }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "shower_start", "shower_end", "nhits", "COG_X_mean", "COG_Y_mean"})
     // RMS value of the shower in x direction
-    .Define("layer_xwidth", [] (vector<Double_t> Hit_X_nonzero, vector<Int_t> layer, Int_t nhits)
+    .Define("layer_xwidth", [] (vector<Double_t> Hit_X_nonzero, vector<Int_t> layer, Int_t nhits, Double_t COG_X_mean)
     {
         vector<Double_t> layer_xwidth(nLayer);
         vector<TH1D*> h;
@@ -370,7 +516,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         for (Int_t i = 0; i < nhits; i++)
         {
             Int_t ilayer = layer.at(i);
-            h.at(ilayer)->Fill(Hit_X_nonzero.at(i));
+            h.at(ilayer)->Fill(Hit_X_nonzero.at(i) - COG_X_mean);
         }
         for (Int_t i = 0; i < h.size(); i++)
         {
@@ -379,9 +525,9 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         }
         vector<TH1D*>().swap(h);
         return layer_xwidth;
-    }, {"Hit_X_nonzero", "layer", "nhits"})
+    }, {"Hit_X_nonzero", "layer", "nhits", "COG_X_mean"})
     // RMS value of the shower in y direction
-    .Define("layer_ywidth", [] (vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, Int_t nhits)
+    .Define("layer_ywidth", [] (vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, Int_t nhits, Double_t COG_Y_mean)
     {
         vector<Double_t> layer_ywidth(nLayer);
         vector<TH1D*> h;
@@ -390,7 +536,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         for (Int_t i = 0; i < nhits; i++)
         {
             Int_t ilayer = layer.at(i);
-            h.at(ilayer)->Fill(Hit_Y_nonzero.at(i));
+            h.at(ilayer)->Fill(Hit_Y_nonzero.at(i) - COG_Y_mean);
         }
         for (Int_t i = 0; i < h.size(); i++)
         {
@@ -399,7 +545,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         }
         vector<TH1D*>().swap(h);
         return layer_ywidth;
-    }, {"Hit_Y_nonzero", "layer", "nhits"})
+    }, {"Hit_Y_nonzero", "layer", "nhits", "COG_Y_mean"})
     // Number of layers with xwidth, ywidth >= 60 mm
     .Define("shower_layer", [] (vector<Double_t> layer_xwidth, vector<Double_t> layer_ywidth)
     {
@@ -422,7 +568,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return hit_layer;
     }, {"layer"})
     // The proportion of layers with xwidth, ywidth >= 60 mm within the layers with at least one hit
-//    .Define("shower_layer_ratio", "shower_layer / hit_layer")
     .Define("shower_layer_ratio", [] (Int_t shower_layer, Int_t hit_layer, Int_t nhits)
     {
         if (nhits == 0)
@@ -616,158 +761,15 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         Double_t FD_3D_rms = Sqrt(total2 / num);
         return FD_3D_rms;
     }, {"FD_3D"})
-    /*
-    // Centre of gravity of each layer, in x direction
-    .Define("COG_X", [] (vector<Double_t> Hit_X_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
+    // The number of tracks of an event, with Hough transformation applied
+    .Define("ntrack", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero)
     {
-        vector<Double_t> cog_x(nLayer);
-        for (Int_t i = 0; i < nhits; i++)
-            cog_x.at(layer.at(i)) += Hit_X_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-        for (Int_t j = 0; j < cog_x.size(); j++)
-        {
-            if (cog_x.at(j) == 0)
-                continue;
-            else
-                cog_x.at(j) /= layer_energy.at(j);
-        }
-        return cog_x;
-    }, {"Hit_X_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
-    // Centre of gravity of each layer, in y direction
-    .Define("COG_Y", [] (vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
-    {
-        vector<Double_t> cog_y(nLayer);
-        for (Int_t i = 0; i < nhits; i++)
-            cog_y.at(layer.at(i)) += Hit_Y_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-        for (Int_t j = 0; j < cog_y.size(); j++)
-        {
-            if (cog_y.at(j) == 0)
-                continue;
-            else
-                cog_y.at(j) /= layer_energy.at(j);
-        }
-        return cog_y;
-    }, {"Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
-    */
-    // Centre of gravity of every 5 layers, in x direction
-    .Define("COG_X_5", [] (vector<Double_t> Hit_X_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
-    {
-        vector<Double_t> cog_x_5(nLayer / 5);
-        vector<Double_t> energy_5layer(nLayer / 5);
-        for (Int_t i = 0; i < nhits; i++)
-            cog_x_5.at(layer.at(i) / 5) += Hit_X_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-        for (Int_t j = 0; j < nLayer; j++)
-            energy_5layer.at(j / 5) += layer_energy.at(j);
-        for (Int_t k = 0; k < nLayer / 5; k++)
-        {
-            if (cog_x_5.at(k) == 0)
-                cog_x_5.at(k) = 400.0;
-            else
-                cog_x_5.at(k) /= energy_5layer.at(k);
-        }
-        return cog_x_5;
-    }, {"Hit_X_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
-    .Define("COG_X_5_0", "COG_X_5[0]")
-    .Define("COG_X_5_1", "COG_X_5[1]")
-    .Define("COG_X_5_2", "COG_X_5[2]")
-    .Define("COG_X_5_3", "COG_X_5[3]")
-    .Define("COG_X_5_4", "COG_X_5[4]")
-    .Define("COG_X_5_5", "COG_X_5[5]")
-    .Define("COG_X_5_6", "COG_X_5[6]")
-    .Define("COG_X_5_7", "COG_X_5[7]")
-    // Centre of gravity of every 5 layers, in y direction
-    .Define("COG_Y_5", [] (vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
-    {
-        vector<Double_t> cog_y_5(nLayer / 5);
-        vector<Double_t> energy_5layer(nLayer / 5);
-        for (Int_t i = 0; i < nhits; i++)
-            cog_y_5.at(layer.at(i) / 5) += Hit_Y_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-        for (Int_t j = 0; j < nLayer; j++)
-            energy_5layer.at(j / 5) += layer_energy.at(j);
-        for (Int_t k = 0; k < nLayer / 5; k++)
-        {
-            if (cog_y_5.at(k) == 0)
-                cog_y_5.at(k) = 400.0;
-            else
-                cog_y_5.at(k) /= energy_5layer.at(k);
-        }
-        return cog_y_5;
-    }, {"Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
-    .Define("COG_Y_5_0", "COG_Y_5[0]")
-    .Define("COG_Y_5_1", "COG_Y_5[1]")
-    .Define("COG_Y_5_2", "COG_Y_5[2]")
-    .Define("COG_Y_5_3", "COG_Y_5[3]")
-    .Define("COG_Y_5_4", "COG_Y_5[4]")
-    .Define("COG_Y_5_5", "COG_Y_5[5]")
-    .Define("COG_Y_5_6", "COG_Y_5[6]")
-    .Define("COG_Y_5_7", "COG_Y_5[7]")
-    // Centre of gravity of every 5 layers, in z direction
-    .Define("COG_Z_5", [] (vector<Double_t> Hit_Z_nonzero, vector<Int_t> layer, vector<Double_t> Hit_Energy_nonzero, vector<Double_t> layer_energy, Int_t nhits)
-    {
-        vector<Double_t> cog_z_5(nLayer / 5);
-        vector<Double_t> energy_5layer(nLayer / 5);
-        for (Int_t i = 0; i < nhits; i++)
-            cog_z_5.at(layer.at(i) / 5) += Hit_Z_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-        for (Int_t j = 0; j < nLayer; j++)
-            energy_5layer.at(j / 5) += layer_energy.at(j);
-        for (Int_t k = 0; k < nLayer / 5; k++)
-        {
-            if (cog_z_5.at(k) == 0)
-                cog_z_5.at(k) = 1500.0;
-            else
-                cog_z_5.at(k) /= energy_5layer.at(k);
-        }
-        return cog_z_5;
-    }, {"Hit_Z_nonzero", "layer", "Hit_Energy_nonzero", "layer_energy", "nhits"})
-    .Define("COG_Z_5_0", "COG_Z_5[0]")
-    .Define("COG_Z_5_1", "COG_Z_5[1]")
-    .Define("COG_Z_5_2", "COG_Z_5[2]")
-    .Define("COG_Z_5_3", "COG_Z_5[3]")
-    .Define("COG_Z_5_4", "COG_Z_5[4]")
-    .Define("COG_Z_5_5", "COG_Z_5[5]")
-    .Define("COG_Z_5_6", "COG_Z_5[6]")
-    .Define("COG_Z_5_7", "COG_Z_5[7]")
-    // The overall centre of gravity, in x direction
-    .Define("COG_X_mean", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
-    {
-        Double_t cog_x_mean = 0;
-        if (Edep == 0)
-            return 400.0;
-        else
-        {
-            for (Int_t i = 0; i < nhits; i++)
-                cog_x_mean += Hit_X_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-            cog_x_mean /= Edep;
-            return cog_x_mean;
-        }
-    }, {"Hit_X_nonzero", "Hit_Energy_nonzero", "Edep", "nhits"})
-    // The overall centre of gravity, in y direction
-    .Define("COG_Y_mean", [] (vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
-    {
-        Double_t cog_y_mean = 0;
-        if (Edep == 0)
-            return 400.0;
-        else
-        {
-            for (Int_t i = 0; i < nhits; i++)
-                cog_y_mean += Hit_Y_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-            cog_y_mean /= Edep;
-            return cog_y_mean;
-        }
-    }, {"Hit_Y_nonzero", "Hit_Energy_nonzero", "Edep", "nhits"})
-    // The overall centre of gravity, in z direction
-    .Define("COG_Z_mean", [] (vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero, Double_t Edep, Int_t nhits)
-    {
-        Double_t cog_z_mean = 0;
-        if (Edep == 0)
-            return 1500.0;
-        else
-        {
-            for (Int_t i = 0; i < nhits; i++)
-                cog_z_mean += Hit_Z_nonzero.at(i) * Hit_Energy_nonzero.at(i);
-            cog_z_mean /= Edep;
-            return cog_z_mean;
-        }
-    }, {"Hit_Z_nonzero", "Hit_Energy_nonzero", "Edep", "nhits"})
+        Int_t ntrack = 0;
+        Hough* hough = new Hough(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, Hit_Energy_nonzero);
+        ntrack = hough->GetNtrack();
+        delete hough;
+        return ntrack;
+    }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "Hit_Energy_nonzero"})
     /*
     //
     .Define("hclx", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero)
@@ -806,15 +808,6 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return hcle;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "Hit_Energy_nonzero"})
     */
-    // The number of tracks of an event, with Hough transformation applied
-    .Define("ntrack", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Double_t> Hit_Z_nonzero, vector<Double_t> Hit_Energy_nonzero)
-    {
-        Int_t ntrack = 0;
-        Hough* hough = new Hough(Hit_X_nonzero, Hit_Y_nonzero, Hit_Z_nonzero, Hit_Energy_nonzero);
-        ntrack = hough->GetNtrack();
-        delete hough;
-        return ntrack;
-    }, {"Hit_X_nonzero", "Hit_Y_nonzero", "Hit_Z_nonzero", "Hit_Energy_nonzero"})
     /*
     // Currently, time information is not available
     // The average time of all the hits
