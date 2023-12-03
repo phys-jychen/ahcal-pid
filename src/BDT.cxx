@@ -62,7 +62,11 @@ Int_t BDT::TrainBDT()
     for (auto l : tebkg)
         dataloader->AddBackgroundTree(l, 1.0, TMVA::Types::kTesting);
 
-    dataloader->PrepareTrainingAndTestTree( "nhits > 0", "SplitMode=Random:NormMode=NumEvents:!V" );
+    // Add different cuts for signal and background events here
+    TCut cut_sig = "Edep > 70";
+    TCut cut_bkg = "Edep > 10";
+
+    dataloader->PrepareTrainingAndTestTree( cut_sig, cut_bkg, "SplitMode=Random:NormMode=NumEvents:!V" );
 
     factory->BookMethod( dataloader,  TMVA::Types::kBDT, "BDTG", "!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.10:UseBaggedBoost:BaggedSampleFraction=0.50:nCuts=20:MaxDepth=2" );
 
