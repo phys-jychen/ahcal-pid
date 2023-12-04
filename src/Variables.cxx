@@ -262,7 +262,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             return cog_z_mean;
         }
     }, {"Hit_Z_nonzero", "Hit_Energy_nonzero", "Edep", "nhits"})
-    // RMS width in x direction
+    // RMS width in x direction (with respect to COGX)
     .Define("xwidth", [] (vector<Double_t> Hit_X_nonzero, Double_t COG_X_mean)
     {
         TH1D* h1 = new TH1D("h1", "", 100, -400, 400);
@@ -272,7 +272,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         delete h1;
         return xwidth;
     }, {"Hit_X_nonzero", "COG_X_mean"})
-    // RMS width in y direction
+    // RMS width in y direction (with respect to COGY)
     .Define("ywidth", [] (vector<Double_t> Hit_Y_nonzero, Double_t COG_Y_mean)
     {
         TH1D* h1 = new TH1D("h1", "", 100, -400, 400);
@@ -463,25 +463,27 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return layer_rms;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits", "COG_X_mean", "COG_Y_mean"})
     // The layer where the shower begins; otherwise it is set to be 42
-    .Define("shower_start", [] (vector<Int_t> hits_on_layer, vector<Double_t> layer_rms)
+    .Define("shower_start", [] (vector<Int_t> hits_on_layer)
     {
         Int_t shower_start = nLayer + 2;
+        const Int_t threshold = 4;
         for (Int_t i = 0; i < nLayer - 3; i++)
-            if (hits_on_layer.at(i) >= 4 && hits_on_layer.at(i + 1) >= 4 && hits_on_layer.at(i + 2) >= 4 && hits_on_layer.at(i + 3) >= 4)
+            if (hits_on_layer.at(i) >= threshold && hits_on_layer.at(i + 1) >= threshold && hits_on_layer.at(i + 2) >= threshold && hits_on_layer.at(i + 3) >= threshold)
             {
                 shower_start = i;
                 break;
             }
         return shower_start;
-    }, {"hits_on_layer", "layer_rms"})
+    }, {"hits_on_layer"})
     // The layer where the shower ends
-    .Define("shower_end", [] (vector<Int_t> hits_on_layer, vector<Double_t> layer_rms, Int_t shower_start)
+    .Define("shower_end", [] (vector<Int_t> hits_on_layer, Int_t shower_start)
     {
         Int_t shower_end = nLayer + 2;
+        const Int_t threshold = 4;
         if (shower_start == nLayer + 2)
             return shower_end;
         for (Int_t i = shower_start; i < hits_on_layer.size() - 2; i++)
-            if (hits_on_layer.at(i) < 4 && hits_on_layer.at(i + 1) < 4 && hits_on_layer.at(i + 2))
+            if (hits_on_layer.at(i) < threshold && hits_on_layer.at(i + 1) < threshold && hits_on_layer.at(i + 2) < threshold)
             {
                 shower_end = i;
                 break;
@@ -489,8 +491,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         if (shower_end == nLayer + 2)
             shower_end = nLayer;
         return shower_end;
-    }, {"hits_on_layer", "layer_rms", "shower_start"})
-    // Shower radius of the shower (between beginning and ending layers)
+    }, {"hits_on_layer", "shower_start"})
+    // Shower radius with respect to COGX and COGY (between beginning and ending layers)
     .Define("shower_radius", [] (vector<Double_t> Hit_X_nonzero, vector<Double_t> Hit_Y_nonzero, vector<Int_t> layer, Int_t beginning, Int_t ending, Int_t nhits, Double_t COG_X_mean, Double_t COG_Y_mean)
     {
         Double_t d2 = 0;
@@ -613,7 +615,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         shower_density /= nhits;
         return shower_density;
     }, {"Hit_X_nonzero", "Hit_Y_nonzero", "layer", "Hit_Energy_nonzero", "nhits"})
-    // The distance between the layer with largest RMS value of position and the beginning layer
+    // The distance between the layer with largest RMS value of position (with respect to COGX and COGY) and the beginning layer
     .Define("shower_length", [] (vector<Double_t> layer_rms, Int_t shower_start)
     {
         Int_t shower_length = 0;
