@@ -1,5 +1,5 @@
 #----------------------------------------
-# Project: cepc-pid
+# Project: ahcal-pid
 #----------------------------------------
 
 # Minimum version of CMake

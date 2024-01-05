@@ -2,6 +2,7 @@
 bin/
 build/
 run/
+figs/
 cmake-build-debug/
 
 # Files:
