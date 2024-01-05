@@ -57,6 +57,7 @@ def plot(fname: str, tree: str, event_index: int, title: str):
 
         ax.plot_surface(xnew, znew, ynew, cmap=cmap, facecolors=cmap(enew), edgecolor='k', alpha=0.75, lw=0.1, rstride=1, cstride=1, antialiased=False)
 
+    ax.set_ylim(0, nLayer)
     ax.set_xticks(np.linspace(-9, 9, 7), 4 * np.linspace(-9, 9, 7).astype(np.int8))
     ax.set_yticks(np.linspace(0, nLayer, 5))
     ax.set_zticks(np.linspace(-9, 9, 7), 4 * np.linspace(-9, 9, 7).astype(np.int8))
@@ -85,7 +86,7 @@ if __name__ == '__main__':
     parser.add_argument("-e", "--event", type=int, default=0, help="The event to be displayed")
     parser.add_argument("-d", "--dir", type=str, default=None, help="Directory to save the plot")
     parser.add_argument("-o", "--output", type=str, default=None, help="Output file name")
-    parser.add_argument("-s", "--show", type=int, default=1, required=True, choices=[0, 1], help="Instantly display or not")
+    parser.add_argument("-s", "--show", type=int, default=1, choices=[0, 1], help="Instantly display or not")
     args = parser.parse_args()
 
     filename = args.file
