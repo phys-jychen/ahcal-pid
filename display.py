@@ -55,9 +55,11 @@ def plot(fname: str, tree: str, event_index: int, title: str):
         znew = z[i] * np.ones(xnew.shape)
         enew = energy_norm[i] * np.ones(xnew.shape)
 
-        ax.plot_surface(xnew, znew, ynew, cmap=cmap, facecolors=cmap(enew), edgecolor='k', alpha=0.75, lw=0.1, rstride=1, cstride=1, antialiased=False)
+        ax.plot_surface(xnew, znew, ynew, cmap=cmap, facecolors=cmap(enew), edgecolor='k', alpha=0.8, lw=0.05, rstride=1, cstride=1, antialiased=False)
 
+    ax.set_xlim(-9, 9)
     ax.set_ylim(0, nLayer)
+    ax.set_zlim(-9, 9)
     ax.set_xticks(np.linspace(-9, 9, 7), 4 * np.linspace(-9, 9, 7).astype(np.int8))
     ax.set_yticks(np.linspace(0, nLayer, 5))
     ax.set_zticks(np.linspace(-9, 9, 7), 4 * np.linspace(-9, 9, 7).astype(np.int8))
