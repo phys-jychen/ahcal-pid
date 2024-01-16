@@ -1,8 +1,8 @@
 #! /bin/bash
 source /home/chenjiyuan/conda.env
 
-energy=100
-particle="neutron"
+energy=120
+particle="pi"
 data_type="MC"
 data_source="SJTU"
 

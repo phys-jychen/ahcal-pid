@@ -32,7 +32,9 @@ def read_file(fname: str, tree: str, event_index: int):
         z = np.round(Hit_Z[event_index] / LayerThick).astype(int)
         energy = Hit_Energy[event_index]
 
-        return (x, y, z, energy)
+        znew, ynew, xnew, enew = (np.array(a) for a in zip(*sorted(zip(z, y, x, energy), reverse = True)))
+
+        return xnew, ynew, znew, enew
 
 
 def plot(fname: str, tree: str, event_index: int, title: str):
@@ -49,8 +51,8 @@ def plot(fname: str, tree: str, event_index: int, title: str):
     cmap = cm.OrRd
 
     for i in np.arange(nhits):
-        xnew = np.arange(x[i], x[i] + 2)
-        ynew = np.arange(y[i], y[i] + 2)
+        xnew = np.arange(x[i] - 1, x[i] + 1)
+        ynew = np.arange(y[i] - 1, y[i] + 1)
         xnew, ynew = np.meshgrid(xnew, ynew)
         znew = z[i] * np.ones(xnew.shape)
         enew = energy_norm[i] * np.ones(xnew.shape)
@@ -76,7 +78,7 @@ def plot(fname: str, tree: str, event_index: int, title: str):
     m.set_array(energy)
     plt.colorbar(m, pad=0.2, label="Hit Energy [MeV]")
 
-    ax.view_init(elev=25, azim=-40, roll=0)
+    ax.view_init(elev=20, azim=-35, roll=0)
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ Ji-Yuan CHEN (SJTU; <jy_chen@sjtu.edu.cn>)
 ## Description
 This program is designed for the PID of CEPC AHCAL. By reconstructing variables describing the topology of the hadronic and electromagnetic shower, we can perform PID with the help of BDT, using the TMVA (the **T**oolkit for **M**ulti-**V**ariate data **A**nalysis with ROOT) package.
 
-For a more intuitive understanding of the shower topology, two python programs are also included for event display.
+For a more intuitive understanding of the shower topology, a python program is also included for event display.
 
 ## Usage
 At first, you can run
@@ -119,6 +119,9 @@ By now, the compilation have been finished. Prepare your datasets, and have fun!
 ## Change Log
 ### 5 January 2024
 Added a simple python program for event display, which was adopted from [ecal-display](https://github.com/phys-jychen/ecal-display). In the event display, the energy of the hits is regarded as the fourth dimension.
+
+### 16 January 2024
+Updated event display.
 
 ## Acknowledgement & Reference
 The author would like to thank Mr Zhen WANG (TDLI/SJTU), for kindly offering his project [cepc\_hbuana](https://github.com/wangz1996/cepc_hbuana) for the convenience of going through the whole process of BDT. In this project (AHCAL-PID), the framework of reconstructing variables and BDT are adopted from cepc\_hbuana.
