@@ -6,16 +6,19 @@ from mpl_toolkits.mplot3d import Axes3D
 import argparse
 from os.path import join
 
-CellWidthX = 40.3
-CellWidthY = 40.3
+CellWidthX = 40.0
+CellWidthY = 40.0
 LayerThick = 30.0
+GapX = 0.3
+GapY = 0.3
+PeriodX = CellWidthX + GapX
+PeriodY = CellWidthY + GapY
 nCellX = 18
 nCellY = 18
 nLayer = 40
-BiasWidthX = 0.5 * CellWidthX
-BiasWidthY = 0.5 * CellWidthY
-WidthX = nCellX * CellWidthX
-WidthY = nCellY * CellWidthY
+WidthX = CellWidthX * nCellX
+WidthY = CellWidthY * nCellY
+Thick = LayerThick * nLayer
 
 
 def read_file(fname: str, tree: str, event_index: int):
@@ -27,8 +30,8 @@ def read_file(fname: str, tree: str, event_index: int):
         Hit_Z = tree['Hit_Z_nonzero'].array(library='np')
         Hit_Energy = tree['Hit_Energy_nonzero'].array(library='np')
 
-        x = np.round((Hit_X[event_index] + 0.5 * CellWidthX) / CellWidthX).astype(int)
-        y = np.round((Hit_Y[event_index] + 0.5 * CellWidthY) / CellWidthY).astype(int)
+        x = np.round(Hit_X[event_index] / PeriodX + 0.5).astype(int)
+        y = np.round(Hit_Y[event_index] / PeriodY + 0.5).astype(int)
         z = np.round(Hit_Z[event_index] / LayerThick).astype(int)
         energy = Hit_Energy[event_index]
 
@@ -47,7 +50,7 @@ def plot(fname: str, tree: str, event_index: int, title: str):
     assert nhits == len(energy)
 
     fig, ax = plt.subplots(subplot_kw={'projection': '3d'})
-    plt.gca().set_box_aspect((1, 5 / 3, 1))
+    plt.gca().set_box_aspect((WidthX / Thick, 1, WidthY / Thick))
     cmap = cm.OrRd
 
     for i in np.arange(nhits):
@@ -70,13 +73,13 @@ def plot(fname: str, tree: str, event_index: int, title: str):
 
     fig.suptitle(title, size='xx-large')
     ax.invert_xaxis()
-    ax.set_xlabel("X [cm]")
-    ax.set_ylabel("Z [layer]")
-    ax.set_zlabel("Y [cm]")
+    ax.set_xlabel("X [cm]", size='x-large')
+    ax.set_ylabel("Z [layer]", size='x-large')
+    ax.set_zlabel("Y [cm]", size='x-large')
 
     m = plt.cm.ScalarMappable(cmap=cmap)
     m.set_array(energy)
-    plt.colorbar(m, pad=0.2, label="Hit Energy [MeV]")
+    plt.colorbar(m, pad=0.2, ax=plt.gca()).set_label(label="Hit Energy [MeV]", size='x-large')
 
     ax.view_init(elev=20, azim=-35, roll=0)
 

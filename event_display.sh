@@ -10,7 +10,7 @@ filename="/lustre/collider/chenjiyuan/ahcal-pid/run/new_geo/selected/training/se
 #tree=Calib_Hit
 event_index=2024
 save_dir=/lustre/collider/chenjiyuan/ahcal-pid/figs/
-output="EventDisplay_${particle}"
+output="Display_${particle}"
 #show=0
 
 title="${energy}-GeV"
